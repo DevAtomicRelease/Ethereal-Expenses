@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.env
+venv/
+.vscode/
+.idea/
+models/beis_adapter/adapter_model.safetensors
+models/beis_adapter/tokenizer.json
+models/*.gguf
+llama_cpp_tools/

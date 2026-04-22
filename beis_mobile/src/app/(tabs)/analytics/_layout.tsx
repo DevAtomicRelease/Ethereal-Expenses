@@ -1,0 +1,12 @@
+import { Stack } from "expo-router";
+
+export default function AnalyticsLayout() {
+  return (
+    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: "#131313" } }}>
+      <Stack.Screen name="index" />
+      <Stack.Screen name="categories" />
+      <Stack.Screen name="report" />
+      <Stack.Screen name="trend" />
+    </Stack>
+  );
+}
