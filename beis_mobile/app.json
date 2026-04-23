@@ -1,11 +1,39 @@
 {
   "expo": {
-    "name": "BEIS", "slug": "beis-mobile", "version": "3.0.0", "orientation": "portrait",
-    "scheme": "beis", "userInterfaceStyle": "automatic",
-    "splash": { "image": "./assets/images/splash.png", "resizeMode": "contain", "backgroundColor": "#0F172A" },
-    "ios": { "bundleIdentifier": "com.beis.app" },
-    "android": { "package": "com.beis.app", "usesCleartextTraffic": true },
-    "plugins": ["expo-router", "expo-secure-store", "expo-notifications"],
-    "experiments": { "typedRoutes": true }
+    "name": "AtomicShift",
+    "slug": "atomicshift-mobile",
+    "version": "3.0.0",
+    "orientation": "portrait",
+    "scheme": "atomicshift",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#131313"
+    },
+    "ios": {
+      "bundleIdentifier": "com.atomicshift.app"
+    },
+    "android": {
+      "package": "com.atomicshift.app",
+      "usesCleartextTraffic": true
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-notifications"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "2444695c-b7ef-4d2d-b115-ce1aa594a57e"
+      }
+    },
+    "owner": "atomichours"
   }
 }
