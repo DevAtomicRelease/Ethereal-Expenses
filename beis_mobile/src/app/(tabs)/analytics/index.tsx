@@ -1,5 +1,5 @@
 /**
- * Analytics Screen — Full redesign matching BEIS dark theme.
+ * Analytics Screen — Full redesign matching AtomicShift dark theme.
  *
  * Sections (stacked vertically):
  *  1. Header + Timeframe selector (7D / 30D / 90D)

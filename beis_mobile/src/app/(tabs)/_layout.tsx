@@ -164,13 +164,18 @@ const styles = StyleSheet.create({
   iconWrap: {
     width: 48,
     height: 48,
-    borderRadius: 24,
+    maxWidth: 48,
+    maxHeight: 48,
+    aspectRatio: 1,
+    borderRadius: 9999,
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
   },
 
   iconWrapActive: {
     backgroundColor: ACTIVE_BG,
+    overflow: "hidden",
     ...Platform.select({
       ios: {
         shadowColor: ACTIVE_BG,

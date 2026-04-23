@@ -91,7 +91,7 @@ function PulseDot({ top, left }: { top: string; left: string }) {
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function IdentityScreen() {
   const router = useRouter();
-  const email = useSelector((s: any) => s.auth?.email ?? "user@beis.app");
+  const email = useSelector((s: any) => s.auth?.email ?? "user@atomicshift.app");
   const { data } = useIdentity();
 
   const confidence = data?.identity_confidence ?? 0;

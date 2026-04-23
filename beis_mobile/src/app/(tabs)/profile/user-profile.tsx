@@ -61,7 +61,7 @@ const arrowForward = `<svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 1
 export default function UserProfileScreen() {
   const router = useRouter();
   const { logout } = useAuth();
-  const email = useSelector((s: any) => s.auth?.email ?? "user@beis.app");
+  const email = useSelector((s: any) => s.auth?.email ?? "user@atomicshift.app");
   const { data: expenseData } = useExpenses({ page: 1, limit: 100 });
 
   const totalSpend = useMemo(() => {
@@ -70,7 +70,7 @@ export default function UserProfileScreen() {
   }, [expenseData]);
 
   const initials = email ? email.slice(0, 2).toUpperCase() : "BE";
-  const userName = email?.split("@")[0]?.replace(/[._]/g, " ") ?? "BEIS User";
+  const userName = email?.split("@")[0]?.replace(/[._]/g, " ") ?? "AtomicShift User";
   const displayName =
     userName.charAt(0).toUpperCase() +
     userName.slice(1).replace(/\b\w/g, (c: string) => c.toUpperCase());
@@ -99,7 +99,7 @@ export default function UserProfileScreen() {
 
           {/* Name + Badge */}
           <Text style={s.heroName}>{displayName}</Text>
-          <Text style={s.heroBadge}>BEIS MEMBER</Text>
+          <Text style={s.heroBadge}>ATOMICSHIFT MEMBER</Text>
 
           {/* Manage Profile button */}
           <TouchableOpacity style={s.manageBtn} activeOpacity={0.85} onPress={() => router.push("/(tabs)/profile/manage-profile" as any)}>

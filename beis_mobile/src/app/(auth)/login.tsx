@@ -91,7 +91,7 @@ export default function LoginScreen() {
                 >
                     {/* ── Branding ── */}
                     <View style={styles.brandContainer}>
-                        <Text style={styles.brandTitle}>BEIS</Text>
+                        <Text style={styles.brandTitle}>AtomicShift</Text>
                         <Text style={styles.brandSubtitle}>SECURE GATEWAY</Text>
                     </View>
 
@@ -223,7 +223,7 @@ export default function LoginScreen() {
 
                     {/* ── Register link ── */}
                     <View style={styles.registerRow}>
-                        <Text style={styles.registerText}>New to BEIS? </Text>
+                        <Text style={styles.registerText}>New to AtomicShift? </Text>
                         <Link href="/(auth)/register" asChild>
                             <TouchableOpacity>
                                 <Text style={styles.registerLink}>Establish Presence</Text>
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
         fontSize: 52,
         fontWeight: "800",
         color: T.primary,
-        letterSpacing: -2,
+        letterSpacing: -3,
         marginBottom: 8,
     },
     brandSubtitle: {

@@ -66,7 +66,7 @@ export default function ThresholdsDetailScreen() {
             <View style={s.infoCard}>
               <Text style={s.infoTitle}>How it works</Text>
               <Text style={s.infoText}>
-                Adaptive thresholds are calculated automatically by BEIS AI based on your 
+                Adaptive thresholds are calculated automatically by AtomicShift AI based on your 
                 spending history. They adjust over time as your behavior evolves, helping you 
                 stay within healthy spending limits.
               </Text>

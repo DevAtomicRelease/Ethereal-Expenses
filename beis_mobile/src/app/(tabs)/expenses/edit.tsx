@@ -214,7 +214,7 @@ export default function ExpenseDetailScreen() {
             <View style={s.anomalyCard}>
               <Text style={s.anomalyLabel}>ANOMALY DETECTED</Text>
               <Text style={s.anomalyText}>
-                This transaction was flagged as unusual by the BEIS Intelligence engine.
+                This transaction was flagged as unusual by the AtomicShift Intelligence engine.
               </Text>
             </View>
           )}

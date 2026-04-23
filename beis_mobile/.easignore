@@ -1,0 +1,5 @@
+# EAS Build ignore – exclude files not needed for the cloud build
+node_modules/
+.expo/
+.env.local
+.git/

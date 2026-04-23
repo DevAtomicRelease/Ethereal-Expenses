@@ -55,10 +55,10 @@ const shieldIcon = `<svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function ManageProfileScreen() {
   const router = useRouter();
-  const email = useSelector((s: any) => s.auth?.email ?? "user@beis.app");
+  const email = useSelector((s: any) => s.auth?.email ?? "user@atomicshift.app");
 
   // Derive display name from email
-  const rawName = email?.split("@")[0]?.replace(/[._]/g, " ") ?? "BEIS User";
+  const rawName = email?.split("@")[0]?.replace(/[._]/g, " ") ?? "AtomicShift User";
   const defaultName =
     rawName.charAt(0).toUpperCase() +
     rawName.slice(1).replace(/\b\w/g, (c: string) => c.toUpperCase());
@@ -127,7 +127,7 @@ export default function ManageProfileScreen() {
           </View>
 
           <Text style={s.heroName}>{fullName}</Text>
-          <Text style={s.heroBadge}>BEIS MEMBER</Text>
+          <Text style={s.heroBadge}>ATOMICSHIFT MEMBER</Text>
         </View>
 
         {/* ── Form Fields ──────────────────────────────────── */}
@@ -297,7 +297,7 @@ export default function ManageProfileScreen() {
             <Text style={s.securityTitle}>Data Encrypted</Text>
             <Text style={s.securitySub}>
               Your personal information is protected with bank-grade AES-256
-              encryption within the BEIS vault.
+              encryption within the AtomicShift vault.
             </Text>
           </View>
         </View>

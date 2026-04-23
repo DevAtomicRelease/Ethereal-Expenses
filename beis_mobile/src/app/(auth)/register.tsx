@@ -125,7 +125,7 @@ export default function RegisterScreen() {
                 >
                     {/* ── Branding ── */}
                     <View style={styles.brandContainer}>
-                        <Text style={styles.brandTitle}>BEIS</Text>
+                        <Text style={styles.brandTitle}>AtomicShift</Text>
                         <Text style={styles.brandSubtitle}>ESTABLISH PRESENCE</Text>
                     </View>
 
@@ -352,7 +352,7 @@ const styles = StyleSheet.create({
         fontSize: 52,
         fontWeight: "800",
         color: T.primary,
-        letterSpacing: -2,
+        letterSpacing: -3,
         marginBottom: 8,
     },
     brandSubtitle: {

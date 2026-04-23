@@ -1,4 +1,4 @@
-# BEIS v3.0 Backend -- MongoDB Atlas + Beanie + NVIDIA NIM API
+# AtomicShift v3.0 Backend -- MongoDB Atlas + Beanie + NVIDIA NIM API
 
 # API Framework
 fastapi==0.109.2

@@ -1,5 +1,5 @@
 /**
- * Intelligence History Screen — Premium activity log from BEIS engines.
+ * Intelligence History Screen — Premium activity log from AtomicShift engines.
  *
  * Layout (from HTML mockup):
  *  1. Header: ← back + "Intelligence History"

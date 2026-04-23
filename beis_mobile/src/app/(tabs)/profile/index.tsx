@@ -141,7 +141,7 @@ function SectionLabel({ text }: { text: string }) {
 export default function SettingsScreen() {
   const router = useRouter();
   const { logout } = useAuth();
-  const email = useSelector((s: any) => s.auth?.email ?? "user@beis.app");
+  const email = useSelector((s: any) => s.auth?.email ?? "user@atomicshift.app");
 
   const [pushEnabled, setPushEnabled] = useState(true);
   const [digestEnabled, setDigestEnabled] = useState(false);
@@ -267,7 +267,7 @@ export default function SettingsScreen() {
             activeOpacity={0.7}
           >
             {icon(ICONS.logout, C.error, 20)}
-            <Text style={styles.logoutText}>Sign out of BEIS</Text>
+            <Text style={styles.logoutText}>Sign out of AtomicShift</Text>
           </TouchableOpacity>
           <Text style={styles.version}>Version 3.0.0</Text>
         </View>

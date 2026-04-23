@@ -3,13 +3,13 @@ import { API_BASE_URL } from "./config";
 
 type EventHandler = (data: any) => void;
 
-class BEISWebSocket {
+class AtomicShiftWebSocket {
   private ws: WebSocket | null = null;
   private handlers = new Map<string, EventHandler[]>();
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
   async connect() {
-    const wsUrl = API_BASE_URL.replace("http", "ws") + "/ws";
+    const wsUrl = API_BASE_URL.replace(/^https/, "wss").replace(/^http/, "ws") + "/ws";
     this.ws = new WebSocket(wsUrl);
     this.ws.onopen = async () => {
       const token = await getAccessToken();
@@ -38,4 +38,4 @@ class BEISWebSocket {
   }
 }
 
-export const wsClient = new BEISWebSocket();
+export const wsClient = new AtomicShiftWebSocket();

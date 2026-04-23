@@ -1,5 +1,5 @@
 """
-BEIS v3.0 Configuration
+AtomicShift v3.0 Configuration
 ========================
 MongoDB Atlas (cloud) + local Redis + NVIDIA NIM API.
 """

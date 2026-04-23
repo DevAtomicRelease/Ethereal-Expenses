@@ -12,7 +12,7 @@ let isRefreshing = false;
 
 export const intelligenceClient = ky.create({
   prefixUrl: API_BASE_URL,
-  timeout: 20000,
+  timeout: 60000,
   retry: { limit: 2, methods: ["get"] },
   headers: { "Content-Type": "application/json" },
   hooks: {

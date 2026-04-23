@@ -1,25 +1,26 @@
 /**
- * API base URL — auto-detected from the Expo dev server (Expo SDK 51).
+ * API base URL — resolved from EXPO_PUBLIC_API_URL (baked in at build time).
  *
- * Expo SDK 51 exposes the Metro bundler host via several possible paths on
- * Constants.  We probe all known locations so it works on physical devices,
- * Android emulators, and the web simultaneously.
+ * For standalone APK/AAB builds, EXPO_PUBLIC_API_URL MUST be set to your
+ * production server URL (e.g. https://hourglass-api-gwjt.onrender.com).
  *
- * Fallback chain:
- *   1. Constants.expoConfig.hostUri           (Expo Go / dev-client, SDK 49+)
- *   2. Constants.manifest2.extra.expoGo.debuggerHost (older Expo Go)
- *   3. Constants.manifest.debuggerHost        (classic manifest, SDK < 46)
+ * For local development, set it to http://YOUR_LAN_IP:8000 in .env.
+ *
+ * Fallback chain (dev only):
+ *   1. Constants.expoConfig.hostUri   (Expo Go / dev-client, SDK 49+)
+ *   2. Constants.manifest2.extra.expoGo.debuggerHost
+ *   3. Constants.manifest.debuggerHost
  *   4. Android emulator →  10.0.2.2
  *   5. iOS simulator   →  localhost
  */
 import Constants from "expo-constants";
 import { Platform } from "react-native";
 
-const BACKEND_PORT = 8001;
+const BACKEND_PORT = 8000;
 
 function resolveBaseUrl(): string {
   // --- Priority 0: Explicit env var (most reliable, works everywhere) ---
-  // Set EXPO_PUBLIC_API_URL=http://YOUR_LAN_IP:8000 in a .env file.
+  // EXPO_PUBLIC_API_URL is inlined at build time by Metro.
   const envUrl = process.env.EXPO_PUBLIC_API_URL;
   if (envUrl) {
     console.log("[API] base URL (EXPO_PUBLIC_API_URL):", envUrl);
@@ -67,3 +68,4 @@ function resolveBaseUrl(): string {
 }
 
 export const API_BASE_URL = resolveBaseUrl();
+

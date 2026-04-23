@@ -1,5 +1,5 @@
 /**
- * BEIS v3.0 — API Response Types
+ * AtomicShift v3.0 — API Response Types
  * ═══════════════════════════════
  * These types match the EXACT shapes returned by the FastAPI backend.
  * Any change to a backend schema MUST be reflected here.

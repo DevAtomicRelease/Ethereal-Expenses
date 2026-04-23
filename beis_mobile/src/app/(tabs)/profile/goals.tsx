@@ -34,7 +34,7 @@ import { SvgXml } from "react-native-svg";
 import { useThresholds } from "@/api/queries/useThresholds";
 import { useExpenses } from "@/api/queries/useExpenses";
 import { useInsights } from "@/api/queries/useInsights";
-import { CATEGORIES, getCategoryLabel } from "@/utils/categories";
+import { CATEGORIES, CATEGORY_LIST, getCategoryLabel } from "@/utils/categories";
 import { formatINR } from "@/utils/currency";
 import { useQueryClient } from "@tanstack/react-query";
 import { dataClient } from "@/api/dataClient";
@@ -202,9 +202,8 @@ export default function SpendingGoalsScreen() {
 
   // ── Available categories (exclude already budgeted) ─────────────────────
   const availableCategories = useMemo(() => {
-    return CATEGORIES.filter((c: any) => {
-      const val = typeof c === "string" ? c : c.value;
-      return !perCategoryBudget[val];
+    return CATEGORY_LIST.filter((c: string) => {
+      return !perCategoryBudget[c];
     });
   }, [perCategoryBudget]);
 
@@ -410,19 +409,18 @@ export default function SpendingGoalsScreen() {
             {/* Category Selection */}
             <Text style={ms.label}>CATEGORY</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={ms.catScroll} contentContainerStyle={ms.catScrollContent}>
-              {availableCategories.map((c: any) => {
-                const val = typeof c === "string" ? c : c.value;
-                const isSelected = selectedCat === val;
+              {availableCategories.map((cat: string) => {
+                const isSelected = selectedCat === cat;
                 return (
                   <TouchableOpacity
-                    key={val}
-                    onPress={() => setSelectedCat(val)}
+                    key={cat}
+                    onPress={() => setSelectedCat(cat)}
                     style={[ms.catChip, isSelected && ms.catChipActive]}
                     activeOpacity={0.7}
                   >
-                    <SvgXml xml={getCatIcon(val).replace(/currentColor/g, isSelected ? C.onPrimary : C.onSurfaceVar)} width={16} height={16} />
+                    <SvgXml xml={getCatIcon(cat).replace(/currentColor/g, isSelected ? C.onPrimary : C.onSurfaceVar)} width={16} height={16} />
                     <Text style={[ms.catChipText, isSelected && ms.catChipTextActive]}>
-                      {getCategoryLabel(val)}
+                      {getCategoryLabel(cat)}
                     </Text>
                   </TouchableOpacity>
                 );

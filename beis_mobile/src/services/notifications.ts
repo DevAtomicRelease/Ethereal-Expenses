@@ -23,7 +23,7 @@ export async function registerForPushNotifications() {
 
  if (Platform.OS === "android") {
  await Notifications.setNotificationChannelAsync("default", {
- name: "BEIS Alerts",
+ name: "AtomicShift Alerts",
  importance: Notifications.AndroidImportance.HIGH,
  });
  }

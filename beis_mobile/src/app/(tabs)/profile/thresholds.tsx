@@ -241,7 +241,7 @@ export default function ThresholdsScreen() {
             height={22}
           />
         </TouchableOpacity>
-        <Text style={s.headerTitle}>BEIS</Text>
+        <Text style={s.headerTitle}>AtomicShift</Text>
       </View>
 
       <ScrollView
@@ -316,7 +316,7 @@ export default function ThresholdsScreen() {
             <Text style={{ color: C.primary, fontWeight: "700" }}>
               {burnPct}% below
             </Text>{" "}
-            your projected monthly burn rate. BEIS suggests maintaining these
+            your projected monthly burn rate. AtomicShift suggests maintaining these
             thresholds for optimal growth.
           </Text>
 

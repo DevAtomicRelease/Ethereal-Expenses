@@ -3,8 +3,15 @@
     "preview": {
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://hourglass-api-gwjt.onrender.com"
       }
     },
-    "production": {}
+    "production": {
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://hourglass-api-gwjt.onrender.com"
+      }
+    }
   }
 }

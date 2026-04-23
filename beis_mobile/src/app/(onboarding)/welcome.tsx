@@ -8,7 +8,7 @@ export default function WelcomeScreen() {
  const router = useRouter();
  return (
  <SafeAreaView style={{ flex: 1, backgroundColor: "#0F172A", justifyContent: "center", padding: 20 }}>
- <Text style={{ color: "#F8FAFC", fontSize: 14, fontWeight: "700", marginBottom: 12 }}>Welcome to BEIS</Text>
+ <Text style={{ color: "#F8FAFC", fontSize: 14, fontWeight: "700", marginBottom: 12 }}>Welcome to AtomicShift</Text>
  <Text style={{ color: "#94A3B8", fontSize: 14, lineHeight: 22, marginBottom: 12 }}>
  Your AI-powered behavioral spending intelligence system.{`\n\n`}
  Import a bank statement for instant insights, or add transactions manually.

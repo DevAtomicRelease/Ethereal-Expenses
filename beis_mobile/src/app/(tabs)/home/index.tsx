@@ -1,7 +1,7 @@
 /**
- * BEIS Dashboard / Home Screen
+ * AtomicShift Dashboard / Home Screen
  * ────────────────────────────
- * Bento-style dark dashboard that mirrors the BEIS web mockup.
+ * Bento-style dark dashboard that mirrors the AtomicShift web mockup.
  *
  * Data sources (all live from backend):
  *  – useExpenses()      → recent transactions list + total spend calculation

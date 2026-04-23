@@ -114,7 +114,7 @@ export default function DataPrivacyScreen() {
           <Text style={s.mainTitle}>Data & Privacy</Text>
           <Text style={s.mainSub}>
             Manage your digital footprint and control how your financial
-            intelligence is stored within the BEIS ecosystem.
+            intelligence is stored within the AtomicShift ecosystem.
           </Text>
         </View>
 

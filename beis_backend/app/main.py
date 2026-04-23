@@ -1,5 +1,5 @@
 """
-BEIS v3.0 -- FastAPI Application
+AtomicShift v3.0 -- FastAPI Application
 ===================================
 MongoDB Atlas + Redis + NVIDIA NIM API.
 """
@@ -46,7 +46,7 @@ async def lifespan(app: FastAPI):
         print(f"[STARTUP] NVIDIA API unavailable")
 
     print("[STARTUP] ================================")
-    print("[STARTUP] BEIS v3.0 ready")
+    print("[STARTUP] AtomicShift v3.0 ready")
     print(f"[STARTUP] DB:    MongoDB Atlas ({settings.DB_NAME})")
     print(f"[STARTUP] Cache: Redis (localhost)")
     print(f"[STARTUP] LLM:   NVIDIA NIM ({settings.NVIDIA_MODEL})")
@@ -54,10 +54,10 @@ async def lifespan(app: FastAPI):
     yield
     await close_db()
     await close_redis()
-    print("[SHUTDOWN] BEIS v3.0 stopped")
+    print("[SHUTDOWN] AtomicShift v3.0 stopped")
 
 
-app = FastAPI(title="BEIS v3.0 API", version="3.0.0", lifespan=lifespan)
+app = FastAPI(title="AtomicShift v3.0 API", version="3.0.0", lifespan=lifespan)
 
 if settings.cors_origin_list == ["*"]:
     app.add_middleware(
