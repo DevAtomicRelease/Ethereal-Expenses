@@ -1,14 +1,19 @@
 {
+  "cli": {
+    "appVersionSource": "local"
+  },
   "build": {
     "preview": {
       "android": {
         "buildType": "apk"
       },
+      "channel": "preview",
       "env": {
         "EXPO_PUBLIC_API_URL": "https://hourglass-api-gwjt.onrender.com"
       }
     },
     "production": {
+      "channel": "production",
       "env": {
         "EXPO_PUBLIC_API_URL": "https://hourglass-api-gwjt.onrender.com"
       }

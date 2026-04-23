@@ -6,9 +6,10 @@
     "orientation": "portrait",
     "scheme": "atomicshift",
     "userInterfaceStyle": "automatic",
+    "icon": "./assets/images/icon.png",
     "splash": {
       "image": "./assets/images/splash.png",
-      "resizeMode": "contain",
+      "resizeMode": "cover",
       "backgroundColor": "#131313"
     },
     "ios": {
@@ -16,7 +17,11 @@
     },
     "android": {
       "package": "com.atomicshift.app",
-      "usesCleartextTraffic": true
+      "usesCleartextTraffic": true,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#131313"
+      }
     },
     "plugins": [
       "expo-router",
@@ -25,6 +30,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "updates": {
+      "url": "https://u.expo.dev/2444695c-b7ef-4d2d-b115-ce1aa594a57e"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
     },
     "extra": {
       "router": {
