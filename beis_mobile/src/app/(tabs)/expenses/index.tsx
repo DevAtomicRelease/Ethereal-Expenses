@@ -27,6 +27,7 @@ import { useExpenses } from "@/api/queries/useExpenses";
 import { formatINRFull } from "@/utils/currency";
 import { getCategoryLabel } from "@/utils/categories";
 import QuickAddFAB from "@/components/expense/QuickAddFAB";
+import OfflineBanner from "@/components/ui/OfflineBanner";
 import {
   isToday,
   isYesterday,
@@ -175,6 +176,8 @@ export default function LedgerScreen() {
       <View style={s.headerBar}>
         <Text style={s.headerTitle}>Transactions</Text>
       </View>
+
+      <OfflineBanner />
 
       <SectionList
         sections={sections}

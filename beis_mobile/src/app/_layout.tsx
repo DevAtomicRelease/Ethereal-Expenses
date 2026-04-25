@@ -5,10 +5,13 @@ import { StatusBar } from "expo-status-bar";
 import { Provider, useSelector } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { QueryClient, QueryClientProvider, useQueryClient, focusManager, onlineManager } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
 import { store, persistor } from "@/store/store";
 import { wsClient } from "@/api/websocket";
-import { initNetworkMonitor } from "@/services/networkMonitor";
+import { initNetworkMonitor, setOnReconnect } from "@/services/networkMonitor";
 
 LogBox.ignoreLogs(['props.pointerEvents is deprecated']);
 
@@ -53,12 +56,24 @@ const queryClient = new QueryClient({
             retry: 3,
             retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 30000),
             staleTime: 1000 * 60 * 5,
+            // Keep cache in memory for 24 hours (for offline persistence)
+            gcTime: 1000 * 60 * 60 * 24,
             // Auto-refetch when network reconnects (Render wakes up)
             refetchOnReconnect: "always",
             // Auto-refetch when app comes back to foreground
             refetchOnWindowFocus: "always",
         },
     },
+});
+
+// ─── Persist React Query cache to AsyncStorage ──────────────────────────────
+// This means when the app opens offline, it can show the last-known data
+// instead of a blank screen.
+const asyncStoragePersister = createAsyncStoragePersister({
+    storage: AsyncStorage,
+    key: "atomicshift_query_cache",
+    // Serialize/deserialize controls
+    throttleTime: 2000, // Don't write to storage more than once per 2s
 });
 
 /**
@@ -69,10 +84,14 @@ function AppShell() {
     const isAuthenticated = useSelector((s: any) => s.auth?.isAuthenticated);
     const qc = useQueryClient();
 
-    // Initialize network monitor once on app mount
+    // Initialize network monitor + register reconnect handler
     useEffect(() => {
         initNetworkMonitor();
-    }, []);
+        // When the device reconnects, flush offline queue then reload all data
+        setOnReconnect(() => {
+            qc.invalidateQueries();
+        });
+    }, [qc]);
 
     // Connect/disconnect WebSocket based on auth state
     useEffect(() => {
@@ -126,11 +145,13 @@ export default function RootLayout() {
     return (
         <Provider store={store}>
             <PersistGate loading={null} persistor={persistor}>
-                <QueryClientProvider client={queryClient}>
+                <PersistQueryClientProvider
+                    client={queryClient}
+                    persistOptions={{ persister: asyncStoragePersister, maxAge: 1000 * 60 * 60 * 24 }}
+                >
                     <AppShell />
-                </QueryClientProvider>
+                </PersistQueryClientProvider>
             </PersistGate>
         </Provider>
     );
 }
-

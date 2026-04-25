@@ -7,6 +7,7 @@ import { setTokens, clearTokens, getAccessToken } from "@/api/tokenManager";
 import type { TokenResponse } from "@/types/api";
 import { router } from "expo-router";
 import { clearIntelligenceCache } from "@/services/intelligenceCache";
+import { clearQueue } from "@/services/offlineQueue";
 
 /** Extract a useful error message from ky HTTPError or generic errors. */
 async function extractError(e: any): Promise<{ status: number; detail: string }> {
@@ -100,7 +101,8 @@ export function useAuth() {
     // Clear ALL local state — prevents data leaking across accounts
     await clearTokens();
     await clearIntelligenceCache();
-    queryClient.clear();          // ← purge all React Query cached data
+    await clearQueue();               // ← purge offline operation queue
+    queryClient.clear();              // ← purge all React Query cached data
     dispatch(logoutAction());
     router.replace("/(auth)/login");
   }, [dispatch, queryClient]);
