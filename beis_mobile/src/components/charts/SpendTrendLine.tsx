@@ -38,7 +38,7 @@ export default function SpendTrendLine({ data }) {
  <Polyline points={polyStr} fill="none" stroke="#3B82F6" strokeWidth={2.5} strokeLinejoin="round" />
  {/* Data points */}
  {points.map((p, i) => (
- <Circle key={i} cx={p.x} cy={p.y} r={3.5} fill="#3B82F6" stroke="#0F172A" strokeWidth={1.5} />
+ <Circle key={i} cx={p.x} cy={p.y} r={3.5} fill="#3B82F6" stroke="#131313" strokeWidth={1.5} />
  ))}
  {/* Y-axis labels */}
  <SvgText x={4} y={padY + 4} fill="#64748B" fontSize={9}>{(maxVal / 1000).toFixed(0)}k</SvgText>

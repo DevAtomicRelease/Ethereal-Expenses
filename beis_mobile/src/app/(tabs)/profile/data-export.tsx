@@ -1,22 +1,14 @@
-/**
- * Data & Privacy Screen — Vault integrity / data management.
- *
- * Layout (from HTML mockup):
- *  1. Header: ← back + "Vault Integrity" + settings icon
- *  2. Title: "Data & Privacy" + description
- *  3. Export Data card (glass): Export Transaction History, Export Behavioral Memory
- *  4. Secure Protocol banner (decorative)
- *  5. Danger Zone card: Delete All Data
- */
-import React from "react";
+import React, { useState } from "react";
 import {
   ScrollView,
   View,
   Text,
+  TextInput,
   TouchableOpacity,
   StyleSheet,
   Platform,
   Alert,
+  Modal,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -50,11 +42,15 @@ const psychIcon = `<svg viewBox="0 0 24 24"><path d="M13 8.57a1.43 1.43 0 100-2.
 const chevronRight = `<svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="currentColor"/></svg>`;
 const deleteIcon = `<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zm2.46-7.12l1.41-1.41L12 12.59l2.12-2.12 1.41 1.41L13.41 14l2.12 2.12-1.41 1.41L12 15.41l-2.12 2.12-1.41-1.41L10.59 14l-2.13-2.12zM15.5 4l-1-1h-5l-1 1H5v2h14V4z" fill="currentColor"/></svg>`;
 const shieldIcon = `<svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z" fill="currentColor"/></svg>`;
+const warningIcon = `<svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" fill="currentColor"/></svg>`;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function DataPrivacyScreen() {
   const router = useRouter();
   const { logout } = useAuth();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteError, setDeleteError] = useState("");
 
   const handleExportTransactions = () => {
     Alert.alert(
@@ -74,19 +70,36 @@ export default function DataPrivacyScreen() {
 
   const handleDeleteAll = () => {
     Alert.alert(
-      "Delete All Data",
-      "This will permanently delete your account and all associated data. This action is irreversible.",
+      "⚠️ Delete All Data",
+      "This will permanently delete your account and all associated data including transactions, behavioral memory, and AI insights.\n\nThis action is IRREVERSIBLE.",
       [
         { text: "Cancel", style: "cancel" },
         {
-          text: "Delete Everything",
+          text: "Continue",
           style: "destructive",
           onPress: () => {
-            logout();
+            setDeletePassword("");
+            setDeleteError("");
+            setShowDeleteModal(true);
           },
         },
       ]
     );
+  };
+
+  const confirmDelete = () => {
+    if (!deletePassword.trim()) {
+      setDeleteError("Please enter your password to confirm.");
+      return;
+    }
+    if (deletePassword.length < 8) {
+      setDeleteError("Password must be at least 8 characters.");
+      return;
+    }
+    // Close modal and proceed with deletion
+    setShowDeleteModal(false);
+    setDeletePassword("");
+    logout();
   };
 
   return (
@@ -243,6 +256,70 @@ export default function DataPrivacyScreen() {
 
         <View style={{ height: 60 }} />
       </ScrollView>
+
+      {/* ── Password Confirmation Modal ──────────────────── */}
+      <Modal
+        visible={showDeleteModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowDeleteModal(false)}
+      >
+        <View style={s.modalOverlay}>
+          <View style={s.modalCard}>
+            {/* Warning icon */}
+            <View style={s.modalIconWrap}>
+              <SvgXml
+                xml={warningIcon.replace(/currentColor/g, C.error)}
+                width={28}
+                height={28}
+              />
+            </View>
+
+            <Text style={s.modalTitle}>Confirm Account Deletion</Text>
+            <Text style={s.modalDesc}>
+              Enter your password to permanently delete all data. This cannot be
+              undone.
+            </Text>
+
+            {/* Password input */}
+            <TextInput
+              style={s.modalInput}
+              placeholder="Enter your password"
+              placeholderTextColor={C.outlineVar + "88"}
+              secureTextEntry
+              value={deletePassword}
+              onChangeText={(t) => {
+                setDeletePassword(t);
+                if (deleteError) setDeleteError("");
+              }}
+              autoFocus
+            />
+
+            {/* Error */}
+            {deleteError ? (
+              <Text style={s.modalError}>{deleteError}</Text>
+            ) : null}
+
+            {/* Buttons */}
+            <View style={s.modalBtnRow}>
+              <TouchableOpacity
+                style={s.modalCancelBtn}
+                onPress={() => setShowDeleteModal(false)}
+                activeOpacity={0.7}
+              >
+                <Text style={s.modalCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={s.modalDeleteBtn}
+                onPress={confirmDelete}
+                activeOpacity={0.85}
+              >
+                <Text style={s.modalDeleteText}>Delete Everything</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -434,5 +511,101 @@ const s = StyleSheet.create({
     fontSize: 15,
     fontWeight: "800",
     letterSpacing: -0.3,
+  },
+
+  // ── Modal ──────────────────────────────────────────────────────────────────
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.75)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
+  },
+  modalCard: {
+    width: "100%",
+    backgroundColor: C.surface,
+    borderRadius: 28,
+    padding: 28,
+    borderWidth: 1,
+    borderColor: C.outlineVar + "22",
+    alignItems: "center",
+  },
+  modalIconWrap: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: C.errorContainer + "1A",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 20,
+  },
+  modalTitle: {
+    color: C.onSurface,
+    fontSize: 20,
+    fontWeight: "800",
+    letterSpacing: -0.3,
+    marginBottom: 8,
+    textAlign: "center",
+  },
+  modalDesc: {
+    color: C.onSurfaceVar,
+    fontSize: 13,
+    lineHeight: 20,
+    textAlign: "center",
+    marginBottom: 24,
+  },
+  modalInput: {
+    width: "100%",
+    backgroundColor: C.surfaceHighest + "66",
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    color: C.onSurface,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: C.outlineVar + "22",
+    marginBottom: 8,
+  },
+  modalError: {
+    color: C.error,
+    fontSize: 12,
+    fontWeight: "600",
+    alignSelf: "flex-start",
+    marginBottom: 16,
+    marginLeft: 4,
+  },
+  modalBtnRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 16,
+    width: "100%",
+  },
+  modalCancelBtn: {
+    flex: 1,
+    paddingVertical: 16,
+    borderRadius: 16,
+    backgroundColor: C.surfaceHighest + "66",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: C.outlineVar + "15",
+  },
+  modalCancelText: {
+    color: C.onSurfaceVar,
+    fontSize: 15,
+    fontWeight: "700",
+  },
+  modalDeleteBtn: {
+    flex: 1,
+    paddingVertical: 16,
+    borderRadius: 16,
+    backgroundColor: C.errorContainer + "33",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: C.errorContainer + "66",
+  },
+  modalDeleteText: {
+    color: C.error,
+    fontSize: 15,
+    fontWeight: "800",
   },
 });

@@ -51,6 +51,15 @@ const calendarIcon = `<svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H
 const paymentIcon = `<svg viewBox="0 0 24 24"><path d="M19 14V6c0-1.1-.9-2-2-2H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zm-9-1c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm13-6v11c0 1.1-.9 2-2 2H4v-2h17V7h2z" fill="currentColor"/></svg>`;
 const locationIcon = `<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="currentColor"/></svg>`;
 const shieldIcon = `<svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z" fill="currentColor"/></svg>`;
+const lockIcon = `<svg viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2z" fill="currentColor"/></svg>`;
+
+// ─── Location options (regions for LLM context) ───────────────────────────────
+const REGIONS = [
+  "North India", "South India", "West India", "East India", "Central India",
+  "Northeast India", "Delhi NCR", "Mumbai Metro", "Bangalore Urban",
+  "Hyderabad Metro", "Chennai Metro", "Kolkata Metro", "Pune Metro",
+  "Other / Prefer not to say",
+] as const;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function ManageProfileScreen() {
@@ -65,10 +74,11 @@ export default function ManageProfileScreen() {
 
   // Local form state
   const [fullName, setFullName] = useState(defaultName);
-  const [emailField, setEmailField] = useState(email);
   const [birthDate, setBirthDate] = useState("");
+  const [dobLocked, setDobLocked] = useState(false);
   const [currency, setCurrency] = useState("INR");
-  const [residence, setResidence] = useState("");
+  const [region, setRegion] = useState("");
+  const [showRegionPicker, setShowRegionPicker] = useState(false);
 
   const initials = fullName
     ? fullName
@@ -77,9 +87,13 @@ export default function ManageProfileScreen() {
         .join("")
         .slice(0, 2)
         .toUpperCase()
-    : "BE";
+    : "AS";
 
   const handleSave = () => {
+    // Lock DOB once it's set
+    if (birthDate.trim() && !dobLocked) {
+      setDobLocked(true);
+    }
     Alert.alert("Profile Saved", "Your personal information has been updated.");
     router.back();
   };
@@ -153,23 +167,22 @@ export default function ManageProfileScreen() {
             </View>
           </View>
 
-          {/* Email */}
-          <View style={s.fieldCard}>
+          {/* Email — read-only, set at registration */}
+          <View style={[s.fieldCard, s.fieldLocked]}>
             <View style={s.fieldContent}>
               <View style={s.fieldTextBlock}>
-                <Text style={s.fieldLabel}>EMAIL ADDRESS</Text>
-                <TextInput
-                  style={s.fieldInput}
-                  value={emailField}
-                  onChangeText={setEmailField}
-                  placeholder="you@email.com"
-                  placeholderTextColor={C.outlineVar + "88"}
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                  <Text style={s.fieldLabel}>EMAIL ADDRESS</Text>
+                  <View style={s.lockBadge}>
+                    <SvgXml xml={lockIcon.replace(/currentColor/g, C.primary)} width={8} height={8} />
+                    <Text style={s.lockBadgeText}>LOCKED</Text>
+                  </View>
+                </View>
+                <Text style={[s.fieldInput, { color: C.onSurfaceVar }]}>{email}</Text>
+                <Text style={s.fieldHint}>Set at registration and cannot be changed.</Text>
               </View>
               <SvgXml
-                xml={mailIcon.replace(/currentColor/g, C.onSurfaceVar + "66")}
+                xml={mailIcon.replace(/currentColor/g, C.onSurfaceVar + "33")}
                 width={18}
                 height={18}
               />
@@ -178,27 +191,39 @@ export default function ManageProfileScreen() {
 
           {/* Birth Date + Currency — stacked on mobile */}
           <View style={s.twoColRow}>
-            <View style={[s.fieldCard, { flex: 1 }]}>
+            <View style={[s.fieldCard, { flex: 1 }, dobLocked && s.fieldLocked]}>
               <View style={s.fieldContent}>
                 <View style={s.fieldTextBlock}>
-                  <Text style={s.fieldLabel}>BIRTH DATE</Text>
-                  <TextInput
-                    style={s.fieldInput}
-                    value={birthDate}
-                    onChangeText={setBirthDate}
-                    placeholder="DD/MM/YYYY"
-                    placeholderTextColor={C.outlineVar + "88"}
-                  />
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                    <Text style={s.fieldLabel}>BIRTH DATE</Text>
+                    {dobLocked && (
+                      <View style={s.lockBadge}>
+                        <SvgXml xml={lockIcon.replace(/currentColor/g, C.primary)} width={8} height={8} />
+                        <Text style={s.lockBadgeText}>LOCKED</Text>
+                      </View>
+                    )}
+                  </View>
+                  {dobLocked ? (
+                    <Text style={[s.fieldInput, { color: C.onSurfaceVar }]}>{birthDate}</Text>
+                  ) : (
+                    <TextInput
+                      style={s.fieldInput}
+                      value={birthDate}
+                      onChangeText={setBirthDate}
+                      placeholder="DD/MM/YYYY"
+                      placeholderTextColor={C.outlineVar + "88"}
+                    />
+                  )}
                 </View>
                 <SvgXml
-                  xml={calendarIcon.replace(
-                    /currentColor/g,
-                    C.onSurfaceVar + "66"
-                  )}
+                  xml={calendarIcon.replace(/currentColor/g, dobLocked ? C.onSurfaceVar + "33" : C.onSurfaceVar + "66")}
                   width={18}
                   height={18}
                 />
               </View>
+              {!dobLocked && (
+                <Text style={s.fieldHint}>Once saved, date of birth cannot be changed.</Text>
+              )}
             </View>
 
             <View style={[s.fieldCard, { flex: 1 }]}>
@@ -226,13 +251,12 @@ export default function ManageProfileScreen() {
             </View>
           </View>
 
-          {/* Residence Card */}
+          {/* Region Card — helps LLM understand geographic spending context */}
           <View style={s.residenceCard}>
             {/* Decorative map-like gradient block */}
             <View style={s.residenceMap}>
               <View style={s.residenceMapOverlay} />
               <View style={s.residenceMapDots}>
-                {/* Subtle decorative dots simulating a map */}
                 {Array.from({ length: 12 }).map((_, i) => (
                   <View
                     key={i}
@@ -248,7 +272,6 @@ export default function ManageProfileScreen() {
                     ]}
                   />
                 ))}
-                {/* Center crosshair */}
                 <View style={s.mapCenter}>
                   <SvgXml
                     xml={locationIcon.replace(/currentColor/g, C.primary + "AA")}
@@ -260,26 +283,43 @@ export default function ManageProfileScreen() {
             </View>
 
             <View style={s.residenceContent}>
-              <View style={s.fieldContent}>
+              <TouchableOpacity
+                style={s.fieldContent}
+                activeOpacity={0.7}
+                onPress={() => setShowRegionPicker(!showRegionPicker)}
+              >
                 <View style={s.fieldTextBlock}>
-                  <Text style={s.fieldLabel}>PRIMARY RESIDENCE</Text>
-                  <TextInput
-                    style={s.fieldInput}
-                    value={residence}
-                    onChangeText={setResidence}
-                    placeholder="City, Country"
-                    placeholderTextColor={C.outlineVar + "88"}
-                  />
+                  <Text style={s.fieldLabel}>REGION</Text>
+                  <Text style={[s.fieldInput, !region && { color: C.outlineVar + "88" }]}>
+                    {region || "Select your region"}
+                  </Text>
+                  <Text style={s.fieldHint}>
+                    Helps AI analyze spending patterns for your area.
+                  </Text>
                 </View>
                 <SvgXml
-                  xml={locationIcon.replace(
-                    /currentColor/g,
-                    C.onSurfaceVar + "66"
-                  )}
+                  xml={locationIcon.replace(/currentColor/g, C.onSurfaceVar + "66")}
                   width={18}
                   height={18}
                 />
-              </View>
+              </TouchableOpacity>
+
+              {showRegionPicker && (
+                <View style={s.regionList}>
+                  {REGIONS.map((r) => (
+                    <TouchableOpacity
+                      key={r}
+                      style={[s.regionItem, region === r && s.regionItemActive]}
+                      onPress={() => { setRegion(r); setShowRegionPicker(false); }}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={[s.regionItemText, region === r && s.regionItemTextActive]}>
+                        {r}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
             </View>
           </View>
         </View>
@@ -534,5 +574,60 @@ const s = StyleSheet.create({
     color: C.onSurfaceVar,
     fontSize: 12,
     lineHeight: 18,
+  },
+
+  // ── Locked field ────────────────────────────────────────────────────────────
+  fieldLocked: {
+    opacity: 0.7,
+    borderColor: C.outlineVar + "08",
+  },
+  lockBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    backgroundColor: C.primary + "15",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  lockBadgeText: {
+    color: C.primary,
+    fontSize: 7,
+    fontWeight: "800",
+    letterSpacing: 1,
+  },
+  fieldHint: {
+    color: C.onSurfaceVar + "66",
+    fontSize: 11,
+    marginTop: 6,
+    lineHeight: 15,
+  },
+
+  // ── Region picker ──────────────────────────────────────────────────────────
+  regionList: {
+    marginTop: 12,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: C.outlineVar + "15",
+    paddingTop: 8,
+  },
+  regionItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 4,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: C.outlineVar + "0A",
+  },
+  regionItemActive: {
+    backgroundColor: C.primary + "12",
+    borderRadius: 10,
+    borderBottomWidth: 0,
+  },
+  regionItemText: {
+    color: C.onSurfaceVar,
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  regionItemTextActive: {
+    color: C.primary,
+    fontWeight: "700",
   },
 });

@@ -16,7 +16,7 @@ export default function RiskDetailScreen() {
  const riskDrivers = r.risk_drivers ?? [];
 
  return (
- <SafeAreaView style={{ flex: 1, backgroundColor: "#0F172A" }}>
+ <SafeAreaView style={{ flex: 1, backgroundColor: "#131313" }}>
  <ScrollView contentContainerStyle={{ padding: 20 }}>
  <Text style={{ color: "#F8FAFC", fontSize: 24, fontWeight: "700", marginBottom: 12 }}>Risk Breakdown</Text>
  <Card>

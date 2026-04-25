@@ -22,5 +22,6 @@ export function useIntelligence() {
       return fresh;
     },
     staleTime: 30 * 60 * 1000,
+    refetchOnMount: "always",
   });
 }

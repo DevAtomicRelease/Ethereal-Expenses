@@ -18,6 +18,7 @@ import {
   Switch,
   StyleSheet,
   Platform,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -223,10 +224,7 @@ export default function SettingsScreen() {
           <SettingsRow
             iconXml={ICONS.history}
             label="Intelligence History"
-            onPress={() => {
-              router.navigate("/(tabs)/insights" as any);
-              setTimeout(() => router.push("/(tabs)/insights/history" as any), 50);
-            }}
+            onPress={() => router.push("/(tabs)/insights/history" as any)}
           />
           <SettingsRow
             iconXml={ICONS.importFile}
@@ -263,7 +261,20 @@ export default function SettingsScreen() {
         <View style={styles.logoutSection}>
           <TouchableOpacity
             style={styles.logoutBtn}
-            onPress={logout}
+            onPress={() => {
+              Alert.alert(
+                "Sign Out",
+                "Are you sure you want to sign out? You'll need to log in again to access your data.",
+                [
+                  { text: "Cancel", style: "cancel" },
+                  {
+                    text: "Sign Out",
+                    style: "destructive",
+                    onPress: logout,
+                  },
+                ]
+              );
+            }}
             activeOpacity={0.7}
           >
             {icon(ICONS.logout, C.error, 20)}

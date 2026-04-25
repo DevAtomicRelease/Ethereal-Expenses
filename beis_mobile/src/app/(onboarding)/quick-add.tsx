@@ -11,7 +11,7 @@ export default function QuickAddScreen() {
  const router = useRouter();
 
  return (
- <SafeAreaView style={{ flex: 1, backgroundColor: "#0F172A" }}>
+ <SafeAreaView style={{ flex: 1, backgroundColor: "#131313" }}>
  <View style={{ padding: 20 }}>
  <Text style={{ color: "#F8FAFC", fontSize: 14, fontWeight: "700" }}>Quick Add</Text>
  <Text style={{ color: "#94A3B8", marginTop: 8, marginBottom: 12 }}>Add 5 expenses to get started ({count}/5)</Text>

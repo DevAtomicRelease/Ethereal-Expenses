@@ -11,9 +11,9 @@ type ButtonProps = {
 };
 
 const COLORS: Record<string, { bg: string; text: string }> = {
- primary: { bg: "#3B82F6", text: "#FFF" },
- secondary: { bg: "#334155", text: "#F8FAFC" },
- danger: { bg: "#EF4444", text: "#FFF" },
+ primary: { bg: "#CCC989", text: "#333202" },
+ secondary: { bg: "#353534", text: "#E5E2E1" },
+ danger: { bg: "#93000A", text: "#FFB4AB" },
 };
 
 export default function Button({ title, onPress, variant = "primary", loading = false, disabled = false, style }: ButtonProps) {
@@ -23,16 +23,17 @@ export default function Button({ title, onPress, variant = "primary", loading = 
  onPress={onPress}
  disabled={disabled || loading}
  style={[{
- backgroundColor: disabled ? "#475569" : c.bg,
- paddingVertical: 12, paddingHorizontal: 20,
- borderRadius: 12, alignItems: "center",
- opacity: disabled ? 0.5 : 1,
+  backgroundColor: disabled ? "#48473B" : c.bg,
+  paddingVertical: 16, paddingHorizontal: 24,
+  borderRadius: 16, alignItems: "center",
+  opacity: disabled ? 0.5 : 1,
  }, style]}
+ activeOpacity={0.85}
  >
  {loading ? (
- <ActivityIndicator color={c.text} />
+  <ActivityIndicator color={c.text} />
  ) : (
- <Text style={{ color: c.text, fontSize: 16, fontWeight: "600" }}>{title}</Text>
+  <Text style={{ color: c.text, fontSize: 16, fontWeight: "700" }}>{title}</Text>
  )}
  </TouchableOpacity>
  );

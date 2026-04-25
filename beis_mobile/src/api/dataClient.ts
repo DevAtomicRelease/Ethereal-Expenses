@@ -12,7 +12,7 @@ let isRefreshing = false;
 
 export const dataClient = ky.create({
   prefixUrl: API_BASE_URL,
-  timeout: 30000,
+  timeout: 60000,
   retry: { limit: 3, methods: ["get", "post", "put", "delete"] },
   headers: { "Content-Type": "application/json" },
   hooks: {

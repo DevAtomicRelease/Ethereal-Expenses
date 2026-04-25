@@ -173,7 +173,7 @@ export default function LedgerScreen() {
     <SafeAreaView style={s.safe} edges={["top"]}>
       {/* ── Header ──────────────────────────────────────────── */}
       <View style={s.headerBar}>
-        <Text style={s.headerTitle}>Ledger</Text>
+        <Text style={s.headerTitle}>Transactions</Text>
       </View>
 
       <SectionList

@@ -13,5 +13,9 @@ export function useExpenses(filters: ExpenseFilters = {}) {
       if (category) params.category = category;
       return dataClient.get("expenses", { searchParams: params }).json();
     },
+    // Always fetch fresh data when the screen mounts (critical for post-login)
+    refetchOnMount: "always",
+    // Short stale time so data refreshes frequently
+    staleTime: 1000 * 60 * 2,
   });
 }

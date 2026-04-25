@@ -10,7 +10,7 @@
  *  – useThresholds()    → daily / weekly / monthly budgets
  */
 
-import React, { useMemo } from "react";
+import React, { useMemo, useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -19,6 +19,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   Platform,
+  RefreshControl,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -108,10 +109,23 @@ export default function HomeScreen() {
   const email: string | null = useSelector((s: any) => s.auth?.email ?? null);
 
   // ── Data fetching ──────────────────────────────────────────────────────────
-  const { data: expenseData, isLoading: expLoading } = useExpenses({ page: 1, limit: 500 });
-  const { data: intelData, isLoading: intelLoading } = useIntelligence();
-  const { data: insightData } = useInsights();
-  const { data: thresholds } = useThresholds();
+  const { data: expenseData, isLoading: expLoading, isError: expError, refetch: refetchExpenses } = useExpenses({ page: 1, limit: 500 });
+  const { data: intelData, isLoading: intelLoading, refetch: refetchIntel } = useIntelligence();
+  const { data: insightData, refetch: refetchInsights } = useInsights();
+  const { data: thresholds, refetch: refetchThresholds } = useThresholds();
+
+  // ── Pull-to-refresh ────────────────────────────────────────────────────────
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await Promise.allSettled([
+      refetchExpenses(),
+      refetchIntel(),
+      refetchInsights(),
+      refetchThresholds(),
+    ]);
+    setRefreshing(false);
+  }, [refetchExpenses, refetchIntel, refetchInsights, refetchThresholds]);
 
   const expenses: ExpenseResponse[] = useMemo(
     () => (expenseData as any)?.transactions ?? [],
@@ -192,6 +206,15 @@ export default function HomeScreen() {
       <ScrollView
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={C.primary}
+            colors={[C.primary]}
+            progressBackgroundColor={C.surface}
+          />
+        }
       >
         {/* ── Total Spend Card (full width) ────────────────────────────── */}
           {/* Total Spend Card */}
@@ -299,6 +322,18 @@ export default function HomeScreen() {
 
           {expLoading ? (
             <ActivityIndicator color={C.primary} style={{ marginTop: 32 }} />
+          ) : expError ? (
+            <View style={styles.emptyState}>
+              <Zap color={C.primary} size={40} strokeWidth={1.5} />
+              <Text style={styles.emptyText}>Server is waking up…</Text>
+              <Text style={styles.emptyHint}>Pull down to refresh, or it will retry automatically</Text>
+              <TouchableOpacity
+                style={{ marginTop: 16, backgroundColor: C.primary + '22', paddingHorizontal: 24, paddingVertical: 10, borderRadius: 12 }}
+                onPress={onRefresh}
+              >
+                <Text style={{ color: C.primary, fontWeight: '700', fontSize: 13 }}>Retry Now</Text>
+              </TouchableOpacity>
+            </View>
           ) : recentExpenses.length === 0 ? (
             <View style={styles.emptyState}>
               <Receipt color={C.outline} size={40} strokeWidth={1.5} />
