@@ -92,18 +92,13 @@ export default function LoginScreen() {
                     {/* ── Branding ── */}
                     <View style={styles.brandContainer}>
                         <Text style={styles.brandTitle}>AtomicShift</Text>
-                        <Text style={styles.brandSubtitle}>SECURE GATEWAY</Text>
+                        <Text style={styles.brandSubtitle}>EXPENSE TRACKER</Text>
                     </View>
 
                     {/* ── Glass Card ── */}
                     <View style={styles.glassCard}>
-                        {/* Header row */}
                         <View style={styles.cardHeader}>
                             <Text style={styles.welcomeText}>Welcome back</Text>
-                            <View style={styles.secureBadge}>
-                                <Text style={styles.secureBadgeIcon}>✓</Text>
-                                <Text style={styles.secureBadgeText}>AI SECURE</Text>
-                            </View>
                         </View>
 
                         {/* ── Email ── */}
@@ -165,11 +160,11 @@ export default function LoginScreen() {
                                     )}
                                 </View>
                                 <Text style={styles.checkboxLabel}>
-                                    Keep me authenticated
+                                    Remember me
                                 </Text>
                             </TouchableOpacity>
                             <TouchableOpacity>
-                                <Text style={styles.recoveryLink}>Recovery</Text>
+                                <Text style={styles.recoveryLink}>Forgot password?</Text>
                             </TouchableOpacity>
                         </View>
 
@@ -195,7 +190,7 @@ export default function LoginScreen() {
                                 ) : (
                                     <>
                                         <Text style={styles.submitBtnText}>
-                                            Continue session
+                                            Sign in
                                         </Text>
                                         <Text style={styles.submitArrow}>→</Text>
                                     </>
@@ -203,30 +198,14 @@ export default function LoginScreen() {
                             </TouchableOpacity>
                         </Animated.View>
 
-                        {/* ── Divider ── */}
-                        <View style={styles.dividerRow}>
-                            <View style={styles.dividerLine} />
-                            <Text style={styles.dividerText}>OR AUTHENTICATE WITH</Text>
-                            <View style={styles.dividerLine} />
-                        </View>
-
-                        {/* ── Biometric buttons ── */}
-                        <View style={styles.biometricRow}>
-                            <TouchableOpacity style={styles.biometricBtn}>
-                                <Text style={styles.biometricIcon}>⊙</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.biometricBtn}>
-                                <Text style={styles.biometricIcon}>☺</Text>
-                            </TouchableOpacity>
-                        </View>
                     </View>
 
-                    {/* ── Register link ── */}
+                    {/* ── Register link ── */}}
                     <View style={styles.registerRow}>
                         <Text style={styles.registerText}>New to AtomicShift? </Text>
                         <Link href="/(auth)/register" asChild>
                             <TouchableOpacity>
-                                <Text style={styles.registerLink}>Establish Presence</Text>
+                                <Text style={styles.registerLink}>Create an account</Text>
                             </TouchableOpacity>
                         </Link>
                     </View>

@@ -157,7 +157,7 @@ export default function SettingsScreen() {
         <View style={styles.header}>
           <Text style={styles.heading}>Settings</Text>
           <Text style={styles.subheading}>
-            Manage your vault and personal preferences.
+            Manage your account and personal preferences.
           </Text>
         </View>
 
@@ -223,7 +223,7 @@ export default function SettingsScreen() {
           />
           <SettingsRow
             iconXml={ICONS.history}
-            label="Intelligence History"
+            label="Reports"
             onPress={() => router.push("/(tabs)/insights/history" as any)}
           />
           <SettingsRow
@@ -244,7 +244,7 @@ export default function SettingsScreen() {
         <View style={styles.card}>
           <ToggleRow
             title="Push Notifications"
-            subtitle="Real-time alerts for vault activity and AI insights."
+            subtitle="Real-time alerts for spending activity and updates."
             value={pushEnabled}
             onToggle={setPushEnabled}
           />

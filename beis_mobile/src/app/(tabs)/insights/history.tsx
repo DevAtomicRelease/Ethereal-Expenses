@@ -178,10 +178,10 @@ export default function IntelligenceHistoryScreen() {
     // 6. System / memory status
     items.push({
       id: "system-status",
-      title: isStale ? "Memory Rebuild Pending" : "System Operating Normally",
+      title: isStale ? "Data Refresh Needed" : "Everything Up to Date",
       description: isStale
-        ? "Behavioral memory is stale and needs rebuilding for accurate insights."
-        : `System is active with ${txnCount} tracked transactions. Data maturity: ${maturity}.`,
+        ? "Your spending data needs refreshing for accurate insights."
+        : `Tracking ${txnCount} transactions. Data maturity: ${maturity}.`,
       category: "System",
       categoryColor: C.primary,
       categoryBg: C.primary + "15",
@@ -208,7 +208,7 @@ export default function IntelligenceHistoryScreen() {
         <TouchableOpacity onPress={() => router.back()} style={s.backBtn}>
           <SvgXml xml={backArrow.replace(/currentColor/g, C.primary)} width={22} height={22} />
         </TouchableOpacity>
-        <Text style={s.headerTitle}>Intelligence History</Text>
+        <Text style={s.headerTitle}>Reports</Text>
       </View>
 
       <ScrollView
@@ -219,7 +219,7 @@ export default function IntelligenceHistoryScreen() {
         <View style={s.healthCard}>
           <View style={s.healthTop}>
             <View>
-              <Text style={s.healthLabel}>SYSTEM HEALTH</Text>
+              <Text style={s.healthLabel}>DATA STATUS</Text>
               <Text style={s.healthTitle}>{phaseLabel}</Text>
             </View>
             <View style={s.healthIconWrap}>
@@ -234,7 +234,7 @@ export default function IntelligenceHistoryScreen() {
           <View style={s.healthBottom}>
             <View style={s.healthBarBlock}>
               <View style={s.healthBarLabelRow}>
-                <Text style={s.healthBarLabel}>COGNITIVE LOAD</Text>
+                <Text style={s.healthBarLabel}>DATA COMPLETENESS</Text>
                 <Text style={s.healthBarValue}>{cognitiveLoad}%</Text>
               </View>
               <View style={s.healthBarTrack}>

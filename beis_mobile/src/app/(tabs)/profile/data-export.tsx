@@ -62,8 +62,8 @@ export default function DataPrivacyScreen() {
 
   const handleExportMemory = () => {
     Alert.alert(
-      "Export Behavioral Memory",
-      "Your behavioral memory data will be exported as an encrypted archive.",
+      "Export Spending Reports",
+      "Your spending reports and analysis data will be exported as an encrypted archive.",
       [{ text: "Cancel", style: "cancel" }, { text: "Export", onPress: () => {} }]
     );
   };
@@ -71,7 +71,7 @@ export default function DataPrivacyScreen() {
   const handleDeleteAll = () => {
     Alert.alert(
       "⚠️ Delete All Data",
-      "This will permanently delete your account and all associated data including transactions, behavioral memory, and AI insights.\n\nThis action is IRREVERSIBLE.",
+      "This will permanently delete your account and all associated data including transactions, spending reports, and insights.\n\nThis action is IRREVERSIBLE.",
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -114,7 +114,7 @@ export default function DataPrivacyScreen() {
               height={22}
             />
           </TouchableOpacity>
-          <Text style={s.headerTitle}>Vault Integrity</Text>
+          <Text style={s.headerTitle}>Data & Privacy</Text>
         </View>
       </View>
 
@@ -126,8 +126,8 @@ export default function DataPrivacyScreen() {
         <View style={s.titleSection}>
           <Text style={s.mainTitle}>Data & Privacy</Text>
           <Text style={s.mainSub}>
-            Manage your digital footprint and control how your financial
-            intelligence is stored within the AtomicShift ecosystem.
+            Manage your data and control how your financial information
+            is stored within AtomicShift.
           </Text>
         </View>
 
@@ -145,8 +145,8 @@ export default function DataPrivacyScreen() {
           </View>
 
           <Text style={s.exportDesc}>
-            Download a comprehensive archive of your encrypted data. This
-            process may take a few minutes depending on your vault size.
+            Download a copy of your data. This process may take a few
+            minutes depending on your data size.
           </Text>
 
           {/* Export Transaction History */}
@@ -182,7 +182,7 @@ export default function DataPrivacyScreen() {
                 width={22}
                 height={22}
               />
-              <Text style={s.exportRowText}>Export Behavioral Memory</Text>
+              <Text style={s.exportRowText}>Export Spending Reports</Text>
             </View>
             <SvgXml
               xml={chevronRight.replace(/currentColor/g, C.onSurfaceVar)}
@@ -226,9 +226,9 @@ export default function DataPrivacyScreen() {
                 width={20}
                 height={20}
               />
-              <Text style={s.bannerTitle}>Secure Protocol</Text>
+              <Text style={s.bannerTitle}>Private and Secure</Text>
             </View>
-            <Text style={s.bannerSub}>END-TO-END VAULT ENCRYPTION</Text>
+            <Text style={s.bannerSub}>FULLY ENCRYPTED DATA</Text>
           </View>
         </View>
 
@@ -236,8 +236,8 @@ export default function DataPrivacyScreen() {
         <View style={s.dangerCard}>
           <Text style={s.dangerTitle}>Danger Zone</Text>
           <Text style={s.dangerDesc}>
-            Permanently remove your account and all associated data from the
-            network. This action is irreversible.
+            Permanently remove your account and all associated data. This
+            action is irreversible.
           </Text>
 
           <TouchableOpacity

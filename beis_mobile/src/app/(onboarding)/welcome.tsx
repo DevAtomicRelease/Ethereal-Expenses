@@ -92,12 +92,12 @@ export default function WelcomeScreen() {
 
           {/* ── Branding ── */}
           <Text style={s.title}>Welcome to AtomicShift</Text>
-          <Text style={s.subtitle}>BEHAVIORAL INTELLIGENCE</Text>
+          <Text style={s.subtitle}>SMART EXPENSE TRACKING</Text>
 
           {/* ── Description ── */}
           <View style={s.descCard}>
             <Text style={s.descText}>
-              Your AI-powered spending intelligence system is ready.{"\n\n"}
+              Your personal spending tracker is ready.{"\n\n"}
               Import a bank statement for instant insights, or start adding transactions manually.
             </Text>
           </View>

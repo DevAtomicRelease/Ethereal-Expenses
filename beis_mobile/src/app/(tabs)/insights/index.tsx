@@ -122,7 +122,7 @@ export default function AIHubScreen() {
         .join(", ");
       const total = ins.total_spend_90d ?? 0;
       const count = ins.txn_count_90d ?? 0;
-      return `Over the last 90 days, you've recorded ${count} transactions totaling ₹${total.toLocaleString("en-IN")}. Your top spending categories are ${topStr}. ${isLlmUnavailable ? "AI narrative is being rebuilt — statistical analysis is active." : ""}`;
+      return `Over the last 90 days, you've recorded ${count} transactions totaling ₹${total.toLocaleString("en-IN")}. Your top spending categories are ${topStr}. ${isLlmUnavailable ? "Your spending summary is being updated — check back shortly." : ""}`;
     }
     return null;
   })();
@@ -172,7 +172,7 @@ export default function AIHubScreen() {
         : "—",
       sub: identity?.identity_confidence != null
         ? `Confidence: ${Math.round(identity.identity_confidence * 100)}%`
-        : "Analyzing…",
+        : "Checking…",
     },
     {
       title: "Identity",
@@ -218,7 +218,7 @@ export default function AIHubScreen() {
     return (
       <SafeAreaView style={[styles.safe, styles.centered]}>
         <ActivityIndicator size="large" color={C.primary} />
-        <Text style={[styles.loadText, { marginTop: 12 }]}>Loading AI Hub…</Text>
+        <Text style={[styles.loadText, { marginTop: 12 }]}>Loading insights…</Text>
       </SafeAreaView>
     );
   }
@@ -239,8 +239,8 @@ export default function AIHubScreen() {
         <View style={styles.header}>
           <View style={styles.headerLeftBorder} />
           <View style={styles.headerContent}>
-            <Text style={styles.headerLabel}>SYSTEM RESPONSE</Text>
-            <Text style={styles.headerTitle}>AI Hub</Text>
+            <Text style={styles.headerLabel}>YOUR OVERVIEW</Text>
+            <Text style={styles.headerTitle}>Insights</Text>
           </View>
           <View style={styles.headerRight}>
             <Text style={styles.confidenceValue}>{confidencePct.toFixed(1)}%</Text>
@@ -258,8 +258,8 @@ export default function AIHubScreen() {
           ) : (
             <Text style={styles.narrativeText}>
               {isInsufficient
-                ? `Add ${Math.max(0, ((intel as any)?.required ?? 5) - txnCount)} more transactions to unlock AI insights.`
-                : "Loading intelligence data…"}
+                ? `Add ${Math.max(0, ((intel as any)?.required ?? 5) - txnCount)} more transactions to unlock spending insights.`
+                : "Loading your spending data…"}
             </Text>
           )}
         </View>
@@ -317,7 +317,7 @@ export default function AIHubScreen() {
 
         {/* ── Core Intelligence Nodes ─────────────────────── */}
         <View style={styles.gridOuter}>
-          <Text style={styles.gridLabel}>CORE INTELLIGENCE NODES</Text>
+          <Text style={styles.gridLabel}>EXPLORE YOUR FINANCES</Text>
           <View style={styles.grid}>
             {nodes.map((node) => (
               <TouchableOpacity
@@ -386,7 +386,7 @@ export default function AIHubScreen() {
                 <Text style={styles.riskDesc}>
                   {risk?.risk_drivers?.length
                     ? risk.risk_drivers.join(". ") + "."
-                    : "Systemic integrity is stable. No immediate threats detected."}
+                    : "Spending is steady. No concerns right now."}
                 </Text>
               </View>
             </View>
@@ -397,9 +397,9 @@ export default function AIHubScreen() {
             <View style={styles.secureIconWrap}>
               {mkIcon(SVG.security, C.onPrimary, 22)}
             </View>
-            <Text style={styles.secureTitle}>Secure Vault</Text>
+            <Text style={styles.secureTitle}>Your Data, Protected</Text>
             <Text style={styles.secureDesc}>
-              Your intelligence assets are encrypted and protected.
+              Your financial data is encrypted and securely stored.
             </Text>
           </View>
         </View>

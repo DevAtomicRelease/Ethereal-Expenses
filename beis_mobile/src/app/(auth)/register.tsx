@@ -126,7 +126,7 @@ export default function RegisterScreen() {
                     {/* ── Branding ── */}
                     <View style={styles.brandContainer}>
                         <Text style={styles.brandTitle}>AtomicShift</Text>
-                        <Text style={styles.brandSubtitle}>ESTABLISH PRESENCE</Text>
+                        <Text style={styles.brandSubtitle}>GET STARTED</Text>
                     </View>
 
                     {/* ── Glass Card ── */}
@@ -285,7 +285,7 @@ export default function RegisterScreen() {
                                 ) : (
                                     <>
                                         <Text style={styles.submitBtnText}>
-                                            Establish presence
+                                            Create account
                                         </Text>
                                         <Text style={styles.submitArrow}>→</Text>
                                     </>
@@ -306,7 +306,7 @@ export default function RegisterScreen() {
                         <Text style={styles.loginText}>Already have access? </Text>
                         <Link href="/(auth)/login" asChild>
                             <TouchableOpacity>
-                                <Text style={styles.loginLink}>Resume Session</Text>
+                                <Text style={styles.loginLink}>Sign in</Text>
                             </TouchableOpacity>
                         </Link>
                     </View>

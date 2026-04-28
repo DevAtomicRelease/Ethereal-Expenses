@@ -473,10 +473,10 @@ export default function AnalyticsDetailScreen() {
           )}
         </View>
 
-        {/* ── Category Intelligence ────────────────────────────── */}
+        {/* ── Category Breakdown ────────────────────────────── */}
         <View style={s.catSection}>
           <View style={s.catHeaderRow}>
-            <Text style={s.catTitle}>Category Intelligence</Text>
+            <Text style={s.catTitle}>Category Breakdown</Text>
           </View>
 
           {sortedCats.length > 0 ? (
@@ -526,7 +526,7 @@ export default function AnalyticsDetailScreen() {
               </View>
               <Text style={s.catEmptyTitle}>No category data yet</Text>
               <Text style={s.catEmptySub}>
-                Add transactions to generate category-level intelligence and
+                Add transactions to generate category-level insights and
                 volatility metrics.
               </Text>
             </View>

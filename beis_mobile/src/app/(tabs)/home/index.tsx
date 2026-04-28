@@ -248,7 +248,7 @@ export default function HomeScreen() {
               <ActivityIndicator color={C.primary} size="small" style={{ marginTop: 8 }} />
             ) : isInsufficient(intelData) ? (
               <Text style={styles.intelBody}>
-                Add {(intelData as InsufficientDataResponse).required - (intelData as InsufficientDataResponse).txn_count} more transactions to unlock AI insights.
+                Add {(intelData as InsufficientDataResponse).required - (intelData as InsufficientDataResponse).txn_count} more transactions to unlock spending insights.
               </Text>
             ) : (
               <Text style={styles.intelBody} numberOfLines={3}>
@@ -313,7 +313,7 @@ export default function HomeScreen() {
           <View style={styles.sectionHeader}>
             <View>
               <Text style={styles.sectionTitle}>Recent Transactions</Text>
-              <Text style={styles.sectionSub}>Real-time ledger of your digital vault</Text>
+              <Text style={styles.sectionSub}>Your recent expense history</Text>
             </View>
             <TouchableOpacity onPress={() => router.push("/(tabs)/expenses")}>
               <Text style={styles.viewAll}>View All</Text>

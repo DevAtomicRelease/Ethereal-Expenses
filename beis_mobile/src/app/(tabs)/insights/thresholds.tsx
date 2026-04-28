@@ -66,8 +66,8 @@ export default function ThresholdsDetailScreen() {
             <View style={s.infoCard}>
               <Text style={s.infoTitle}>How it works</Text>
               <Text style={s.infoText}>
-                Adaptive thresholds are calculated automatically by AtomicShift AI based on your 
-                spending history. They adjust over time as your behavior evolves, helping you 
+                Spending limits are calculated automatically based on your 
+                spending history. They adjust over time as your habits change, helping you 
                 stay within healthy spending limits.
               </Text>
             </View>
