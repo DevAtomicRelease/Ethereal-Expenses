@@ -9,13 +9,13 @@
       },
       "channel": "preview",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://hourglass-api-gwjt.onrender.com"
+        "EXPO_PUBLIC_API_URL": "https://hourglass-o8n2.onrender.com"
       }
     },
     "production": {
       "channel": "production",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://hourglass-api-gwjt.onrender.com"
+        "EXPO_PUBLIC_API_URL": "https://hourglass-o8n2.onrender.com"
       }
     }
   }

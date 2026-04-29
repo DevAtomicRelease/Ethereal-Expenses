@@ -114,7 +114,7 @@ async def chat(req: ChatRequest, user: User = Depends(get_current_user)):
                 "status": "error",
             }
         except httpx.HTTPStatusError as e:
-            logger.error(f"Chat API HTTP error: {e.response.status_code}")
+            logger.error(f"Chat API HTTP error: {e.response.status_code} — {e.response.text[:300]}")
             return {
                 "reply": "Something went wrong on my end. Please try again shortly.",
                 "status": "error",
