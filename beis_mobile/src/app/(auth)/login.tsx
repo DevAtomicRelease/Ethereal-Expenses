@@ -200,7 +200,7 @@ export default function LoginScreen() {
 
                     </View>
 
-                    {/* ── Register link ── */}}
+                    {/* ── Register link ── */}
                     <View style={styles.registerRow}>
                         <Text style={styles.registerText}>New to AtomicShift? </Text>
                         <Link href="/(auth)/register" asChild>

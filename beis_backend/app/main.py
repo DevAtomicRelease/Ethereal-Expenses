@@ -19,6 +19,7 @@ from app.routers.expenses import router as expenses_router
 from app.routers.intelligence import router as intelligence_router
 from app.routers.memory import router as memory_router
 from app.routers.reports import router as reports_router
+from app.routers.chat import router as chat_router
 from app.websocket.handler import websocket_endpoint
 
 
@@ -81,6 +82,7 @@ app.include_router(expenses_router)
 app.include_router(intelligence_router)
 app.include_router(memory_router)
 app.include_router(reports_router)
+app.include_router(chat_router)
 app.websocket("/ws")(websocket_endpoint)
 
 

@@ -12,6 +12,20 @@ export default function InsightsLayout() {
       <Stack.Screen name="thresholds" />
       <Stack.Screen name="analytics" />
       <Stack.Screen name="risk-breakdown" />
+      <Stack.Screen
+        name="chat"
+        options={{
+          animation: "slide_from_bottom",
+          gestureEnabled: true,
+        }}
+      />
+      <Stack.Screen
+        name="heatmap"
+        options={{
+          animation: "slide_from_right",
+          gestureEnabled: true,
+        }}
+      />
     </Stack>
   );
 }

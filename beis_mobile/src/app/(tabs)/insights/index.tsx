@@ -28,6 +28,8 @@ import {
   ActivityIndicator,
   StyleSheet,
   Platform,
+  Animated,
+  Easing,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { SvgXml } from "react-native-svg";
@@ -76,6 +78,8 @@ const SVG = {
   warning: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" fill="currentColor"/></svg>`,
   analytics: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7 5h2V3H7v2zm0 8h2v-2H7v2zm0 8h2v-2H7v2zm4-4h2v-2h-2v2zm0 4h2v-2h-2v2zm-8 0h2v-2H3v2zm0-4h2v-2H3v2zm0-4h2v-2H3v2zm0-4h2V5H3v2zm0-4h2V1H3v2zm4 8h2V9H7v2zm8 8h2v-2h-2v2zm0-4h2v-2h-2v2zm4 0h2v-2h-2v2zm0 4h2v-2h-2v2zm0-8h2v-2h-2v2zm0-4h2V5h-2v2zm0-4V1h-2v2h2zm-4 0h2V1h-2v2zm0 16h2v-2h-2v2zm0-8h2V9h-2v2zm-4-4h2V5h-2v2zm0 4h2V9h-2v2zm0 4h2v-2h-2v2z" fill="currentColor"/></svg>`,
   security: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z" fill="currentColor"/></svg>`,
+  chat: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" fill="currentColor"/></svg>`,
+  heatmap: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" fill="currentColor"/></svg>`,
 };
 
 // ─── Intelligence grid node definition ────────────────────────────────────────
@@ -103,6 +107,17 @@ export default function AIHubScreen() {
   const { data: anomalies } = useAnomalies();
   const { data: risk } = useRisk();
   const { txnCount, maturity } = useDataMaturity();
+
+  // ── Chat FAB animation ────────────────────────────────────────────────────
+  const fabScale = React.useRef(new Animated.Value(0)).current;
+  React.useEffect(() => {
+    Animated.spring(fabScale, {
+      toValue: 1,
+      friction: 5,
+      tension: 60,
+      useNativeDriver: true,
+    }).start();
+  }, []);
 
   const isInsufficient = (intel as any)?.status === "insufficient_data";
   const isLlmUnavailable = (intel as any)?.status === "error" || (intel as any)?.model_unavailable;
@@ -392,6 +407,26 @@ export default function AIHubScreen() {
             </View>
           </TouchableOpacity>
 
+          {/* Heatmap card */}
+          <TouchableOpacity
+            style={styles.heatmapCard}
+            activeOpacity={0.8}
+            onPress={() => router.push("/(tabs)/insights/heatmap")}
+          >
+            <View style={styles.heatmapLeft}>
+              <View style={styles.heatmapIconWrap}>
+                {mkIcon(SVG.heatmap, C.primary, 22)}
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.heatmapTitle}>Spending Heatmap</Text>
+                <Text style={styles.heatmapDesc}>
+                  Visualise your daily spending patterns on a calendar
+                </Text>
+              </View>
+            </View>
+            <Text style={styles.heatmapArrow}>›</Text>
+          </TouchableOpacity>
+
           {/* Gold accent card */}
           <View style={styles.secureCard}>
             <View style={styles.secureIconWrap}>
@@ -407,6 +442,17 @@ export default function AIHubScreen() {
         {/* Bottom spacer for nav pill */}
         <View style={{ height: 120 }} />
       </ScrollView>
+
+      {/* ── Floating Chat Button ── */}
+      <Animated.View style={[styles.fab, { transform: [{ scale: fabScale }] }]}>
+        <TouchableOpacity
+          style={styles.fabInner}
+          activeOpacity={0.8}
+          onPress={() => router.push("/(tabs)/insights/chat")}
+        >
+          {mkIcon(SVG.chat, C.onPrimary, 24)}
+        </TouchableOpacity>
+      </Animated.View>
     </SafeAreaView>
   );
 }
@@ -417,6 +463,31 @@ export default function AIHubScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: C.bg },
   centered: { justifyContent: "center", alignItems: "center" },
+
+  // ── Floating Chat Button ──
+  fab: {
+    position: "absolute",
+    bottom: 100,
+    right: 20,
+    zIndex: 100,
+  },
+  fabInner: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: C.primary,
+    alignItems: "center",
+    justifyContent: "center",
+    ...Platform.select({
+      ios: {
+        shadowColor: C.primary,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.35,
+        shadowRadius: 12,
+      },
+      android: { elevation: 8 },
+    }),
+  },
   scroll: { paddingBottom: 40 },
   loadText: { color: C.onSurfaceVar, fontSize: 13 },
 
@@ -716,5 +787,48 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     width: 32,
     textAlign: "right",
+  },
+
+  // ── Heatmap Card ──
+  heatmapCard: {
+    backgroundColor: C.surface,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: C.outlineVar + "15",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  heatmapLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+    gap: 14,
+  },
+  heatmapIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: C.primary + "1A",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  heatmapTitle: {
+    color: C.onSurface,
+    fontSize: 15,
+    fontWeight: "700",
+  },
+  heatmapDesc: {
+    color: C.onSurfaceVar + "99",
+    fontSize: 12,
+    marginTop: 2,
+  },
+  heatmapArrow: {
+    color: C.primary,
+    fontSize: 24,
+    fontWeight: "300",
+    marginLeft: 8,
   },
 });
