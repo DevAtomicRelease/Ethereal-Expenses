@@ -156,7 +156,7 @@ export default function AIHubScreen() {
   // ── Grid node data ──────────────────────────────────────────────────────────
   const nodes: NodeDef[] = [
     {
-      title: "Analytics",
+      title: "Spending Trends",
       route: "/(tabs)/insights/analytics",
       iconKey: "memory",
       iconColor: C.primary,
@@ -165,7 +165,7 @@ export default function AIHubScreen() {
       sub: narrative ? `${(narrative as string).slice(0, 40)}…` : "Needs more data",
     },
     {
-      title: "Momentum",
+      title: "Weekly Pulse",
       route: "/(tabs)/insights/momentum",
       iconKey: "trending",
       iconColor: C.primary,
@@ -178,7 +178,7 @@ export default function AIHubScreen() {
         : "No data yet",
     },
     {
-      title: "Behavior",
+      title: "Spending Style",
       route: "/(tabs)/insights/behavior",
       iconKey: "fingerprint",
       iconColor: C.primary,
@@ -191,7 +191,7 @@ export default function AIHubScreen() {
         : "Checking…",
     },
     {
-      title: "Identity",
+      title: "Financial Portrait",
       route: "/(tabs)/insights/identity",
       iconKey: "face",
       iconColor: C.primary,
@@ -204,7 +204,7 @@ export default function AIHubScreen() {
         : "No patterns yet",
     },
     {
-      title: "Thresholds",
+      title: "Budget Limits",
       route: "/(tabs)/insights/thresholds",
       iconKey: "tune",
       iconColor: C.primary,
@@ -217,7 +217,7 @@ export default function AIHubScreen() {
         : "Configure limits",
     },
     {
-      title: "Anomalies",
+      title: "Unusual Activity",
       route: "/(tabs)/insights/anomalies",
       iconKey: "warning",
       iconColor: C.error,

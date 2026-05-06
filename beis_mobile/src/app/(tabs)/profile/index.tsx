@@ -218,7 +218,7 @@ export default function SettingsScreen() {
           />
           <SettingsRow
             iconXml={ICONS.privacy}
-            label="Adaptive Thresholds"
+            label="Budget Limits"
             onPress={() => router.push("/(tabs)/profile/thresholds" as any)}
           />
           <SettingsRow
