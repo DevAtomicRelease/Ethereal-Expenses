@@ -99,7 +99,7 @@ function getHeatLabel(amount: number, avg: number): string {
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 interface Expense {
-  _id: string;
+  id: string;
   amount: number;
   category: string;
   description?: string;
@@ -120,15 +120,26 @@ export default function HeatmapScreen() {
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [selectedDay, setSelectedDay] = useState<DayData | null>(null);
 
-  // Fetch ALL expenses (large limit to get full history)
+  // Fetch ALL expenses with pagination (backend returns { transactions, total, page, limit })
   const { data: expenseData } = useQuery({
     queryKey: ["expenses", "heatmap"],
     queryFn: async () => {
-      const resp: any = await dataClient.get("expenses", {
-        searchParams: { page: "1", limit: "500" },
-      }).json();
-      return resp.expenses || resp.items || [];
+      const all: any[] = [];
+      let page = 1;
+      const perPage = 500;
+      while (true) {
+        const resp: any = await dataClient.get("expenses", {
+          searchParams: { page: String(page), limit: String(perPage) },
+        }).json();
+        const batch = resp.transactions || [];
+        all.push(...batch);
+        // Stop if we got fewer than requested or reached total
+        if (batch.length < perPage || all.length >= (resp.total || Infinity)) break;
+        page++;
+      }
+      return all;
     },
+    refetchOnMount: "always",
     staleTime: 1000 * 60 * 5,
   });
 
@@ -391,7 +402,7 @@ export default function HeatmapScreen() {
 
             <FlatList
               data={selectedDay?.expenses || []}
-              keyExtractor={(item) => item._id}
+              keyExtractor={(item) => item.id}
               style={{ maxHeight: 360 }}
               renderItem={({ item }) => (
                 <View style={s.txnRow}>

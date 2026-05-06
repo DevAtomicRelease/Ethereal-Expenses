@@ -26,6 +26,13 @@ export default function InsightsLayout() {
           gestureEnabled: true,
         }}
       />
+      <Stack.Screen
+        name="streaks"
+        options={{
+          animation: "slide_from_right",
+          gestureEnabled: true,
+        }}
+      />
     </Stack>
   );
 }

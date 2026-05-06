@@ -80,6 +80,7 @@ const SVG = {
   security: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z" fill="currentColor"/></svg>`,
   chat: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z" fill="currentColor"/></svg>`,
   heatmap: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" fill="currentColor"/></svg>`,
+  fire: `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z" fill="currentColor"/></svg>`,
 };
 
 // ─── Intelligence grid node definition ────────────────────────────────────────
@@ -421,6 +422,26 @@ export default function AIHubScreen() {
                 <Text style={styles.heatmapTitle}>Spending Heatmap</Text>
                 <Text style={styles.heatmapDesc}>
                   Visualise your daily spending patterns on a calendar
+                </Text>
+              </View>
+            </View>
+            <Text style={styles.heatmapArrow}>›</Text>
+          </TouchableOpacity>
+
+          {/* Streaks & Challenges card */}
+          <TouchableOpacity
+            style={styles.heatmapCard}
+            activeOpacity={0.8}
+            onPress={() => router.push("/(tabs)/insights/streaks")}
+          >
+            <View style={styles.heatmapLeft}>
+              <View style={[styles.heatmapIconWrap, { backgroundColor: "#FF980015" }]}>
+                {mkIcon(SVG.fire, "#FF9800", 22)}
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.heatmapTitle}>Streaks & Challenges</Text>
+                <Text style={styles.heatmapDesc}>
+                  Gamified spending habits and achievements
                 </Text>
               </View>
             </View>

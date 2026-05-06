@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "AtomicShift",
-    "slug": "atomicshift-mobile",
+    "name": "Ethereal Expense",
+    "slug": "ethereal-expense",
     "version": "3.0.0",
     "orientation": "portrait",
     "scheme": "atomicshift",

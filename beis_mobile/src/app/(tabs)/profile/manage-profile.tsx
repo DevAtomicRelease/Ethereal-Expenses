@@ -73,7 +73,7 @@ export default function ManageProfileScreen() {
     rawName.slice(1).replace(/\b\w/g, (c: string) => c.toUpperCase());
 
   // Local form state
-  const [fullName, setFullName] = useState(defaultName);
+  const [fullName, setFullName] = useState(defaultName);\
   const [birthDate, setBirthDate] = useState("");
   const [dobLocked, setDobLocked] = useState(false);
   const [currency, setCurrency] = useState("INR");
