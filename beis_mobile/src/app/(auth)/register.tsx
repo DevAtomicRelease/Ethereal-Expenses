@@ -125,7 +125,7 @@ export default function RegisterScreen() {
                 >
                     {/* ── Branding ── */}
                     <View style={styles.brandContainer}>
-                        <Text style={styles.brandTitle}>AtomicShift</Text>
+                        <Text style={styles.brandTitle}>Ethereal Expense</Text>
                         <Text style={styles.brandSubtitle}>GET STARTED</Text>
                     </View>
 

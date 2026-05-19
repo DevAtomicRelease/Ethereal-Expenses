@@ -104,3 +104,24 @@ class AnomalyLog(Document):
         json_encoders = {PydanticObjectId: str}
 
     model_config = {"json_encoders": {PydanticObjectId: str}}
+
+
+class SplitExpense(Document):
+    """Tracks a shared expense between the user and contacts."""
+    user_id: Indexed(str)
+    transaction_id: Optional[str] = None
+    title: str
+    total_amount: float
+    your_share: float = 0.0
+    category: str = "misc"
+    participants: List[Dict] = Field(default_factory=list)
+    # Each participant: {"name": str, "share": float, "settled": bool}
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    is_settled: bool = False
+
+    class Settings:
+        name = "split_expenses"
+        indexes = [[("user_id", 1), ("created_at", -1)]]
+        json_encoders = {PydanticObjectId: str}
+
+    model_config = {"json_encoders": {PydanticObjectId: str}}

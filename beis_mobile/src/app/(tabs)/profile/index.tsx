@@ -142,7 +142,7 @@ function SectionLabel({ text }: { text: string }) {
 export default function SettingsScreen() {
   const router = useRouter();
   const { logout } = useAuth();
-  const email = useSelector((s: any) => s.auth?.email ?? "user@atomicshift.app");
+  const email = useSelector((s: any) => s.auth?.email ?? "user@ethereal.app");
 
   const [pushEnabled, setPushEnabled] = useState(true);
   const [digestEnabled, setDigestEnabled] = useState(false);
@@ -278,9 +278,9 @@ export default function SettingsScreen() {
             activeOpacity={0.7}
           >
             {icon(ICONS.logout, C.error, 20)}
-            <Text style={styles.logoutText}>Sign out of AtomicShift</Text>
+            <Text style={styles.logoutText}>Sign Out</Text>
           </TouchableOpacity>
-          <Text style={styles.version}>Version 3.0.0</Text>
+          <Text style={styles.version}>Ethereal Expense · v3.0.0</Text>
         </View>
 
         {/* Bottom spacer for nav pill */}

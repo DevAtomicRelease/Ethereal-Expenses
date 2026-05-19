@@ -23,7 +23,7 @@ export async function registerForPushNotifications() {
 
  if (Platform.OS === "android") {
  await Notifications.setNotificationChannelAsync("default", {
- name: "AtomicShift Alerts",
+ name: "Ethereal Expense Alerts",
  importance: Notifications.AndroidImportance.HIGH,
  });
  }

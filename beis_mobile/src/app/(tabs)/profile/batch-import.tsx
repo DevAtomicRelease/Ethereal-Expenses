@@ -133,7 +133,7 @@ export default function BatchImportScreen() {
         <View style={s.titleSection}>
           <Text style={s.mainTitle}>Select Import Method</Text>
           <Text style={s.mainSub}>
-            Choose how you'd like to bring your financial data into AtomicShift.
+            Choose how you'd like to bring your financial data into Ethereal Expense.
           </Text>
         </View>
 

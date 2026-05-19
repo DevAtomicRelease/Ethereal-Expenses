@@ -1,7 +1,7 @@
 /**
- * AtomicShift Dashboard / Home Screen
+ * Ethereal Expense Dashboard / Home Screen
  * ────────────────────────────
- * Bento-style dark dashboard that mirrors the AtomicShift web mockup.
+ * Bento-style dark dashboard that mirrors the Ethereal Expense design.
  *
  * Data sources (all live from backend):
  *  – useExpenses()      → recent transactions list + total spend calculation
@@ -138,6 +138,25 @@ export default function HomeScreen() {
     [expenses]
   );
 
+  // Monthly spend (current calendar month only)
+  const { monthlySpent, daysElapsed, daysInMonth } = useMemo(() => {
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const spent = expenses
+      .filter((e) => new Date(e.timestamp) >= monthStart)
+      .reduce((sum, e) => sum + e.amount, 0);
+    const elapsed = now.getDate();
+    const totalDays = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    return { monthlySpent: spent, daysElapsed: elapsed, daysInMonth: totalDays };
+  }, [expenses]);
+
+  // End-of-month forecast
+  const dailyRate = daysElapsed > 0 ? monthlySpent / daysElapsed : 0;
+  const forecast = dailyRate * daysInMonth;
+  const remainingDays = daysInMonth - daysElapsed;
+  const monthName = new Date().toLocaleDateString("en-IN", { month: "long" });
+  const forecastVsBudget = monthlyBudget > 0 ? ((forecast - monthlyBudget) / monthlyBudget) * 100 : 0;
+
   const intel = !isInsufficient(intelData) ? (intelData as IntelligenceResponse) : null;
   const signals = intel?.compressed_signals ?? null;
 
@@ -172,7 +191,7 @@ export default function HomeScreen() {
 
   // Monthly budget progress
   const monthlyBudget = thresholds?.monthly ?? 0;
-  const budgetProgress = monthlyBudget > 0 ? Math.min(totalSpend / monthlyBudget, 1) : 0;
+  const budgetProgress = monthlyBudget > 0 ? Math.min(monthlySpent / monthlyBudget, 1) : 0;
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
@@ -182,10 +201,7 @@ export default function HomeScreen() {
         <View style={styles.headerLeft}>
           {/* Avatar circle with email initials — taps to profile */}
           <TouchableOpacity
-            onPress={() => {
-              router.navigate("/(tabs)/profile" as any);
-              setTimeout(() => router.push("/(tabs)/profile/user-profile" as any), 50);
-            }}
+            onPress={() => router.push("/(tabs)/profile/user-profile" as any)}
             activeOpacity={0.7}
           >
             <View style={styles.avatar}>
@@ -216,15 +232,14 @@ export default function HomeScreen() {
           />
         }
       >
-        {/* ── Total Spend Card (full width) ────────────────────────────── */}
-          {/* Total Spend Card */}
+        {/* ── Monthly Spend Card ────────────────────────────────────── */}
           <View style={[styles.bentoCard, styles.spendCard, { marginBottom: 14 }]}>
             <View style={styles.spendGlow} />
-            <Text style={styles.spendLabel}>TOTAL SPEND</Text>
+            <Text style={styles.spendLabel}>{monthName.toUpperCase()} SPEND</Text>
             {expLoading ? (
               <ActivityIndicator color={C.primary} style={{ marginVertical: 12 }} />
             ) : (
-              <Text style={styles.spendAmount}>{formatINR(totalSpend)}</Text>
+              <Text style={styles.spendAmount}>{formatINR(monthlySpent)}</Text>
             )}
             <View style={styles.spendBadgeRow}>
               {momentumUp
@@ -238,6 +253,30 @@ export default function HomeScreen() {
               </Text>
             </View>
           </View>
+
+        {/* ── End-of-Month Forecast Card ─────────────────────────────── */}
+        {!expLoading && monthlySpent > 0 && (
+          <View style={[styles.bentoCard, styles.forecastCard, { marginBottom: 14 }]}>
+            <View style={styles.forecastHeader}>
+              <Text style={styles.forecastLabel}>📈 END-OF-MONTH FORECAST</Text>
+              <Text style={styles.forecastDays}>{remainingDays}d left</Text>
+            </View>
+            <Text style={styles.forecastAmount}>{formatINR(Math.round(forecast))}</Text>
+            <Text style={styles.forecastSub}>
+              Based on {formatINR(Math.round(dailyRate))}/day avg · {daysElapsed} days tracked
+            </Text>
+            {monthlyBudget > 0 && (
+              <View style={styles.forecastBudgetRow}>
+                <View style={[styles.forecastDot, { backgroundColor: forecastVsBudget > 0 ? C.error : C.success }]} />
+                <Text style={[styles.forecastBudgetText, { color: forecastVsBudget > 0 ? C.error : C.success }]}>
+                  {forecastVsBudget > 0
+                    ? `${Math.round(forecastVsBudget)}% over budget`
+                    : `${Math.abs(Math.round(forecastVsBudget))}% under budget`}
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
 
         {/* ── Weekly Report Card (full width, below) ───────────────────── */}
           {/* AI Insight / Weekly Card */}
@@ -301,7 +340,7 @@ export default function HomeScreen() {
                   />
                 </View>
                 <Text style={styles.statChipValue}>
-                  {formatINR(totalSpend)} / {formatINR(monthlyBudget)}
+                  {formatINR(monthlySpent)} / {formatINR(monthlyBudget)}
                 </Text>
               </View>
             )}
@@ -658,6 +697,61 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: C.error,
     marginTop: 5,
+  },
+
+  // ── Forecast Card ──────────────────────────────────────────────────────────
+  forecastCard: {
+    backgroundColor: C.surface,
+    borderWidth: 1,
+    borderColor: C.outline + "22",
+  },
+  forecastHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  forecastLabel: {
+    color: C.onSurfaceVar,
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 1.5,
+  },
+  forecastDays: {
+    color: C.outline,
+    fontSize: 11,
+    fontWeight: "600",
+    backgroundColor: C.surfaceHigh,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    overflow: "hidden",
+  },
+  forecastAmount: {
+    color: C.onSurface,
+    fontSize: 30,
+    fontWeight: "900",
+    letterSpacing: -1.5,
+  },
+  forecastSub: {
+    color: C.onSurfaceVar + "88",
+    fontSize: 12,
+    marginTop: 4,
+  },
+  forecastBudgetRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginTop: 10,
+  },
+  forecastDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  forecastBudgetText: {
+    fontSize: 12,
+    fontWeight: "700",
   },
 
   // ── Empty State ────────────────────────────────────────────────────────────

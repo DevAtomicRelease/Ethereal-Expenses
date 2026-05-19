@@ -91,7 +91,7 @@ export default function WelcomeScreen() {
           </View>
 
           {/* ── Branding ── */}
-          <Text style={s.title}>Welcome to AtomicShift</Text>
+          <Text style={s.title}>Welcome to Ethereal Expense</Text>
           <Text style={s.subtitle}>SMART EXPENSE TRACKING</Text>
 
           {/* ── Description ── */}

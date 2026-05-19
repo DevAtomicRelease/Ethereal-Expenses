@@ -64,10 +64,10 @@ const REGIONS = [
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function ManageProfileScreen() {
   const router = useRouter();
-  const email = useSelector((s: any) => s.auth?.email ?? "user@atomicshift.app");
+  const email = useSelector((s: any) => s.auth?.email ?? "user@ethereal.app");
 
   // Derive display name from email
-  const rawName = email?.split("@")[0]?.replace(/[._]/g, " ") ?? "AtomicShift User";
+  const rawName = email?.split("@")[0]?.replace(/[._]/g, " ") ?? "Ethereal User";
   const defaultName =
     rawName.charAt(0).toUpperCase() +
     rawName.slice(1).replace(/\b\w/g, (c: string) => c.toUpperCase());
@@ -141,7 +141,7 @@ export default function ManageProfileScreen() {
           </View>
 
           <Text style={s.heroName}>{fullName}</Text>
-          <Text style={s.heroBadge}>ATOMICSHIFT MEMBER</Text>
+          <Text style={s.heroBadge}>ETHEREAL MEMBER</Text>
         </View>
 
         {/* ── Form Fields ──────────────────────────────────── */}
@@ -337,7 +337,7 @@ export default function ManageProfileScreen() {
             <Text style={s.securityTitle}>Data Encrypted</Text>
             <Text style={s.securitySub}>
               Your personal information is protected with bank-grade AES-256
-              encryption within the AtomicShift vault.
+              encryption within the Ethereal Expense vault.
             </Text>
           </View>
         </View>

@@ -201,7 +201,7 @@ export default function ChatScreen() {
           </TouchableOpacity>
           <View style={s.headerCenter}>
             <Text style={s.headerTitle}>Finance Assistant</Text>
-            <Text style={s.headerSub}>Powered by AtomicShift</Text>
+            <Text style={s.headerSub}>Powered by Ethereal</Text>
           </View>
           <View style={{ width: 34 }} />
         </View>

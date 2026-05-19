@@ -214,7 +214,7 @@ export default function ExpenseDetailScreen() {
             <View style={s.anomalyCard}>
               <Text style={s.anomalyLabel}>ANOMALY DETECTED</Text>
               <Text style={s.anomalyText}>
-                This transaction was flagged as unusual by the AtomicShift Intelligence engine.
+                This transaction was flagged as unusual by the Ethereal Expense intelligence engine.
               </Text>
             </View>
           )}

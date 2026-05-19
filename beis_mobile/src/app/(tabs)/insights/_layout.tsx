@@ -33,6 +33,14 @@ export default function InsightsLayout() {
           gestureEnabled: true,
         }}
       />
+      <Stack.Screen
+        name="recurring"
+        options={{ animation: "slide_from_right", gestureEnabled: true }}
+      />
+      <Stack.Screen
+        name="splits"
+        options={{ animation: "slide_from_right", gestureEnabled: true }}
+      />
     </Stack>
   );
 }

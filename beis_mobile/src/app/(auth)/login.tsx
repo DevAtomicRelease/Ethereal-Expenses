@@ -91,7 +91,7 @@ export default function LoginScreen() {
                 >
                     {/* ── Branding ── */}
                     <View style={styles.brandContainer}>
-                        <Text style={styles.brandTitle}>AtomicShift</Text>
+                        <Text style={styles.brandTitle}>Ethereal Expense</Text>
                         <Text style={styles.brandSubtitle}>EXPENSE TRACKER</Text>
                     </View>
 
@@ -202,7 +202,7 @@ export default function LoginScreen() {
 
                     {/* ── Register link ── */}
                     <View style={styles.registerRow}>
-                        <Text style={styles.registerText}>New to AtomicShift? </Text>
+                        <Text style={styles.registerText}>New to Ethereal? </Text>
                         <Link href="/(auth)/register" asChild>
                             <TouchableOpacity>
                                 <Text style={styles.registerLink}>Create an account</Text>

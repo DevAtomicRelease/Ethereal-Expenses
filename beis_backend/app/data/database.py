@@ -28,14 +28,14 @@ async def init_db():
     # Import all Beanie document models
     from app.data.models import (
         User, Transaction, BehavioralMemory,
-        IntelligenceResult, AnomalyLog,
+        IntelligenceResult, AnomalyLog, SplitExpense,
     )
 
     await init_beanie(
         database=db,
         document_models=[
             User, Transaction, BehavioralMemory,
-            IntelligenceResult, AnomalyLog,
+            IntelligenceResult, AnomalyLog, SplitExpense,
         ],
     )
 

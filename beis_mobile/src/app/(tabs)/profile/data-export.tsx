@@ -127,7 +127,7 @@ export default function DataPrivacyScreen() {
           <Text style={s.mainTitle}>Data & Privacy</Text>
           <Text style={s.mainSub}>
             Manage your data and control how your financial information
-            is stored within AtomicShift.
+            is stored within Ethereal Expense.
           </Text>
         </View>
 
