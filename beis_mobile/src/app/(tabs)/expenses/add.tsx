@@ -26,7 +26,9 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Alert,
+  Modal,
 } from "react-native";
+import { useTodaySpend } from "@/hooks/useTodaySpend";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SvgXml } from "react-native-svg";
@@ -204,6 +206,11 @@ export default function AddExpenseScreen() {
   const { mutate: updateMutate, isPending: updatePending } = useUpdateExpense();
   const isPending = isEditing ? updatePending : addPending;
 
+  // ── Budget warning state ────────────────────────────────────────────────
+  const { todaySpent, dailyLimit, percentUsed, isNearBudget } = useTodaySpend();
+  const [showBudgetWarning, setShowBudgetWarning] = useState(false);
+  const [pendingFormData, setPendingFormData] = useState<ExpenseFormData | null>(null);
+
   // Parse initial values from params (edit mode) or defaults (add mode)
   const initialAmount = params.amount ? parseFloat(params.amount) : 0;
   const initialCategory = params.category || "food";
@@ -255,7 +262,8 @@ export default function AddExpenseScreen() {
     [currentTimestamp, setValue]
   );
 
-  const onSave = (data: ExpenseFormData) => {
+  // ── Actually submit the expense (called directly or after warning confirmation)
+  const submitExpense = (data: ExpenseFormData) => {
     if (isEditing) {
       updateMutate(
         {
@@ -265,11 +273,11 @@ export default function AddExpenseScreen() {
             category: data.category,
             description: data.description,
             timestamp: data.timestamp,
+            mood: data.mood,
           },
         },
         {
           onSuccess: () => {
-            // Go back twice: past the detail screen to the ledger
             router.back();
             setTimeout(() => router.back(), 100);
           },
@@ -284,6 +292,7 @@ export default function AddExpenseScreen() {
           category: data.category,
           description: data.description,
           timestamp: data.timestamp,
+          mood: data.mood,
         },
         {
           onSuccess: () => router.back(),
@@ -292,6 +301,22 @@ export default function AddExpenseScreen() {
         }
       );
     }
+  };
+
+  // ── Pre-save handler: check budget before submitting ────────────────────
+  const onSave = (data: ExpenseFormData) => {
+    // Only show warning for new expenses (not edits), when near/over daily budget
+    if (!isEditing && dailyLimit > 0) {
+      const newTotal = todaySpent + data.amount;
+      const newPercent = newTotal / dailyLimit;
+      if (newPercent >= 0.8) {
+        // Store the form data and show warning
+        setPendingFormData(data);
+        setShowBudgetWarning(true);
+        return;
+      }
+    }
+    submitExpense(data);
   };
 
   return (
@@ -412,6 +437,40 @@ export default function AddExpenseScreen() {
               )}
             />
           </View>
+          {/* ── Mood (Optional) ──────────────────────────────────── */}
+          <View style={s.fieldSection}>
+            <Text style={s.fieldLabel}>How are you feeling? (Optional)</Text>
+            <Controller
+              control={control}
+              name="mood"
+              render={({ field: { onChange, value } }) => (
+                <View style={s.moodRow}>
+                  {[
+                    { key: "happy",      emoji: "😊", label: "Happy" },
+                    { key: "neutral",    emoji: "😐", label: "Neutral" },
+                    { key: "stressed",   emoji: "😟", label: "Stressed" },
+                    { key: "frustrated", emoji: "😤", label: "Frustrated" },
+                    { key: "tired",      emoji: "😴", label: "Tired" },
+                  ].map((m) => {
+                    const active = value === m.key;
+                    return (
+                      <TouchableOpacity
+                        key={m.key}
+                        onPress={() => onChange(active ? undefined : m.key)}
+                        style={[s.moodChip, active && s.moodChipActive]}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={s.moodEmoji}>{m.emoji}</Text>
+                        <Text style={[s.moodLabel, active && s.moodLabelActive]}>
+                          {m.label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              )}
+            />
+          </View>
 
           {/* ── Calendar ───────────────────────────────────────── */}
           <View style={s.fieldSection}>
@@ -448,9 +507,228 @@ export default function AddExpenseScreen() {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
+
+      {/* ── Budget Warning Bottom Sheet ─────────────────────────── */}
+      <BudgetWarningSheet
+        visible={showBudgetWarning}
+        todaySpent={todaySpent}
+        newAmount={pendingFormData?.amount ?? 0}
+        dailyLimit={dailyLimit}
+        onConfirm={() => {
+          setShowBudgetWarning(false);
+          if (pendingFormData) submitExpense(pendingFormData);
+          setPendingFormData(null);
+        }}
+        onCancel={() => {
+          setShowBudgetWarning(false);
+          setPendingFormData(null);
+        }}
+      />
     </SafeAreaView>
   );
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// BUDGET WARNING BOTTOM SHEET
+// ═══════════════════════════════════════════════════════════════════════════════
+function BudgetWarningSheet({
+  visible,
+  todaySpent,
+  newAmount,
+  dailyLimit,
+  onConfirm,
+  onCancel,
+}: {
+  visible: boolean;
+  todaySpent: number;
+  newAmount: number;
+  dailyLimit: number;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  const newTotal = todaySpent + newAmount;
+  const pctBefore = dailyLimit > 0 ? Math.min(todaySpent / dailyLimit, 1) : 0;
+  const pctAfter = dailyLimit > 0 ? Math.min(newTotal / dailyLimit, 1) : 0;
+  const isOver = newTotal > dailyLimit;
+  const overBy = Math.max(0, newTotal - dailyLimit);
+
+  const fmt = (n: number) => `\u20B9${Math.round(n).toLocaleString("en-IN")}`;
+
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onCancel}>
+      <View style={bw.overlay}>
+        <View style={bw.sheet}>
+          {/* Drag handle */}
+          <View style={bw.handle} />
+
+          {/* Header */}
+          <Text style={bw.emoji}>{isOver ? "🚨" : "⚠️"}</Text>
+          <Text style={bw.title}>
+            {isOver ? "Daily Budget Exceeded" : "Approaching Daily Limit"}
+          </Text>
+          <Text style={bw.subtitle}>
+            {isOver
+              ? `This will put you ${fmt(overBy)} over your daily limit.`
+              : `You\u2019ve used ${Math.round(pctAfter * 100)}% of today\u2019s budget.`}
+          </Text>
+
+          {/* Progress bar */}
+          <View style={bw.progressTrack}>
+            <View style={[bw.progressBefore, { width: `${Math.round(pctBefore * 100)}%` as any }]} />
+            <View
+              style={[
+                bw.progressNew,
+                {
+                  width: `${Math.round(Math.min(pctAfter - pctBefore, 1 - pctBefore) * 100)}%` as any,
+                  backgroundColor: isOver ? C.error : "#F59E0B",
+                },
+              ]}
+            />
+          </View>
+
+          {/* Breakdown */}
+          <View style={bw.breakdownRow}>
+            <Text style={bw.breakdownLabel}>Spent today</Text>
+            <Text style={bw.breakdownValue}>{fmt(todaySpent)}</Text>
+          </View>
+          <View style={bw.breakdownRow}>
+            <Text style={bw.breakdownLabel}>This expense</Text>
+            <Text style={[bw.breakdownValue, { color: "#F59E0B" }]}>+{fmt(newAmount)}</Text>
+          </View>
+          <View style={[bw.breakdownRow, bw.breakdownTotal]}>
+            <Text style={[bw.breakdownLabel, { fontWeight: "700" }]}>New total</Text>
+            <Text style={[bw.breakdownValue, { color: isOver ? C.error : C.primary, fontWeight: "800" }]}>
+              {fmt(newTotal)}
+            </Text>
+          </View>
+          <View style={bw.breakdownRow}>
+            <Text style={bw.breakdownLabel}>Daily limit</Text>
+            <Text style={bw.breakdownValue}>{fmt(dailyLimit)}</Text>
+          </View>
+
+          {/* Buttons */}
+          <View style={bw.btnRow}>
+            <TouchableOpacity style={bw.cancelBtn} onPress={onCancel} activeOpacity={0.7}>
+              <Text style={bw.cancelBtnText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={bw.confirmBtn} onPress={onConfirm} activeOpacity={0.85}>
+              <Text style={bw.confirmBtnText}>Add Anyway</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+const bw = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.55)",
+    justifyContent: "flex-end",
+  },
+  sheet: {
+    backgroundColor: C.surface,
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    padding: 28,
+    paddingBottom: Platform.OS === "ios" ? 44 : 28,
+    alignItems: "center",
+  },
+  handle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: C.surfaceHighest,
+    marginBottom: 20,
+  },
+  emoji: { fontSize: 40, marginBottom: 12 },
+  title: {
+    color: C.onSurface,
+    fontSize: 20,
+    fontWeight: "800",
+    letterSpacing: -0.5,
+    marginBottom: 6,
+    textAlign: "center",
+  },
+  subtitle: {
+    color: C.onSurfaceVar,
+    fontSize: 14,
+    textAlign: "center",
+    marginBottom: 20,
+    lineHeight: 20,
+  },
+  progressTrack: {
+    width: "100%",
+    height: 8,
+    backgroundColor: C.surfaceHighest,
+    borderRadius: 4,
+    flexDirection: "row",
+    overflow: "hidden",
+    marginBottom: 20,
+  },
+  progressBefore: {
+    height: "100%",
+    backgroundColor: C.primary,
+  },
+  progressNew: {
+    height: "100%",
+  },
+  breakdownRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    paddingVertical: 8,
+  },
+  breakdownTotal: {
+    borderTopWidth: 1,
+    borderTopColor: C.outlineVar + "33",
+    paddingTop: 12,
+    marginTop: 4,
+  },
+  breakdownLabel: {
+    color: C.onSurfaceVar,
+    fontSize: 14,
+  },
+  breakdownValue: {
+    color: C.onSurface,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  btnRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 24,
+    width: "100%",
+  },
+  cancelBtn: {
+    flex: 1,
+    height: 52,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: C.outlineVar,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cancelBtnText: {
+    color: C.onSurfaceVar,
+    fontSize: 15,
+    fontWeight: "700",
+  },
+  confirmBtn: {
+    flex: 1,
+    height: 52,
+    borderRadius: 14,
+    backgroundColor: C.errorContainer,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  confirmBtnText: {
+    color: C.error,
+    fontSize: 15,
+    fontWeight: "700",
+  },
+});
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CALENDAR STYLES
@@ -646,6 +924,39 @@ const s = StyleSheet.create({
     minHeight: 90,
     borderWidth: 1,
     borderColor: C.outlineVar + "1A",
+  },
+
+  // ── Mood picker ──────────────────────────────────────────────────────────
+  moodRow: {
+    flexDirection: "row",
+    gap: 8,
+    flexWrap: "wrap",
+  },
+  moodChip: {
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 14,
+    backgroundColor: C.surface,
+    borderWidth: 1,
+    borderColor: C.outlineVar + "1A",
+    gap: 4,
+  },
+  moodChipActive: {
+    backgroundColor: C.primary + "22",
+    borderColor: C.primary,
+  },
+  moodEmoji: {
+    fontSize: 22,
+  },
+  moodLabel: {
+    color: C.onSurfaceVar,
+    fontSize: 10,
+    fontWeight: "600",
+  },
+  moodLabelActive: {
+    color: C.primary,
+    fontWeight: "700",
   },
 
   bottomBar: {

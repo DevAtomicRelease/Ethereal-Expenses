@@ -7,6 +7,7 @@ export const expenseSchema = z.object({
  category: z.enum(CATEGORY_LIST as [string, ...string[]]),
  description: z.string().max(500).optional(),
  timestamp: z.string().min(1, "Date required"),
+ mood: z.string().optional(),
 });
 
 export type ExpenseFormData = z.infer<typeof expenseSchema>;

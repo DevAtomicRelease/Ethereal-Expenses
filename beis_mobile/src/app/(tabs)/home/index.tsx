@@ -51,11 +51,15 @@ import { useExpenses } from "@/api/queries/useExpenses";
 import { useIntelligence } from "@/api/queries/useIntelligence";
 import { useInsights } from "@/api/queries/useInsights";
 import { useThresholds } from "@/api/queries/useThresholds";
+import { useBenchmarks } from "@/api/queries/useBenchmarks";
+import { useMoodCorrelation } from "@/api/queries/useMoodCorrelation";
 
 // ─── Utils ────────────────────────────────────────────────────────────────────
 import { formatINR, formatINRFull } from "@/utils/currency";
 import { relativeTime } from "@/utils/dates";
 import { getCategoryColor, getCategoryLabel } from "@/utils/categories";
+import { useTodaySpend } from "@/hooks/useTodaySpend";
+
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 import type { ExpenseResponse, IntelligenceResponse, InsufficientDataResponse } from "@/types/api";
@@ -113,6 +117,8 @@ export default function HomeScreen() {
   const { data: intelData, isLoading: intelLoading, refetch: refetchIntel } = useIntelligence();
   const { data: insightData, refetch: refetchInsights } = useInsights();
   const { data: thresholds, refetch: refetchThresholds } = useThresholds();
+  const { data: benchmarkData } = useBenchmarks();
+  const { data: moodData } = useMoodCorrelation();
 
   // ── Pull-to-refresh ────────────────────────────────────────────────────────
   const [refreshing, setRefreshing] = useState(false);
@@ -139,23 +145,25 @@ export default function HomeScreen() {
   );
 
   // Monthly spend (current calendar month only)
-  const { monthlySpent, daysElapsed, daysInMonth } = useMemo(() => {
+  const monthlySpent = useMemo(() => {
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const spent = expenses
+    return expenses
       .filter((e) => new Date(e.timestamp) >= monthStart)
       .reduce((sum, e) => sum + e.amount, 0);
-    const elapsed = now.getDate();
-    const totalDays = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-    return { monthlySpent: spent, daysElapsed: elapsed, daysInMonth: totalDays };
   }, [expenses]);
 
-  // End-of-month forecast
-  const dailyRate = daysElapsed > 0 ? monthlySpent / daysElapsed : 0;
-  const forecast = dailyRate * daysInMonth;
-  const remainingDays = daysInMonth - daysElapsed;
+  // Monthly budget progress
+  const monthlyBudget = thresholds?.monthly ?? 0;
+  const budgetProgress = monthlyBudget > 0 ? Math.min(monthlySpent / monthlyBudget, 1) : 0;
+
   const monthName = new Date().toLocaleDateString("en-IN", { month: "long" });
-  const forecastVsBudget = monthlyBudget > 0 ? ((forecast - monthlyBudget) / monthlyBudget) * 100 : 0;
+
+  // ── Real-time daily spending meter ────────────────────────────────────
+  const { todaySpent, dailyLimit, percentUsed, isOverBudget, isNearBudget } = useTodaySpend();
+  const dailyMeterColor = isOverBudget ? C.error : isNearBudget ? "#F59E0B" : C.primary;
+
+
 
   const intel = !isInsufficient(intelData) ? (intelData as IntelligenceResponse) : null;
   const signals = intel?.compressed_signals ?? null;
@@ -189,9 +197,7 @@ export default function HomeScreen() {
   // Recent 5 expenses for the list
   const recentExpenses = expenses.slice(0, 5);
 
-  // Monthly budget progress
-  const monthlyBudget = thresholds?.monthly ?? 0;
-  const budgetProgress = monthlyBudget > 0 ? Math.min(monthlySpent / monthlyBudget, 1) : 0;
+
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
@@ -201,7 +207,7 @@ export default function HomeScreen() {
         <View style={styles.headerLeft}>
           {/* Avatar circle with email initials — taps to profile */}
           <TouchableOpacity
-            onPress={() => router.push("/(tabs)/profile/user-profile" as any)}
+            onPress={() => router.navigate("/(tabs)/profile" as any)}
             activeOpacity={0.7}
           >
             <View style={styles.avatar}>
@@ -212,7 +218,7 @@ export default function HomeScreen() {
         </View>
         <TouchableOpacity
           style={styles.headerBtn}
-          onPress={() => router.push("/(tabs)/insights")}
+          onPress={() => router.navigate("/(tabs)/insights" as any)}
           accessibilityLabel="View insights"
         >
           <Brain color={C.primary} size={22} strokeWidth={2} />
@@ -254,27 +260,133 @@ export default function HomeScreen() {
             </View>
           </View>
 
-        {/* ── End-of-Month Forecast Card ─────────────────────────────── */}
-        {!expLoading && monthlySpent > 0 && (
-          <View style={[styles.bentoCard, styles.forecastCard, { marginBottom: 14 }]}>
-            <View style={styles.forecastHeader}>
-              <Text style={styles.forecastLabel}>📈 END-OF-MONTH FORECAST</Text>
-              <Text style={styles.forecastDays}>{remainingDays}d left</Text>
+        {/* ── Daily Spending Meter ───────────────────────────────── */}
+        {dailyLimit > 0 && (
+          <View style={[styles.bentoCard, styles.dailyMeterCard, { marginBottom: 14 }]}>
+            <View style={styles.dailyMeterHeader}>
+              <Text style={styles.dailyMeterLabel}>TODAY'S SPEND</Text>
+              <Text style={[styles.dailyMeterPct, { color: dailyMeterColor }]}>
+                {Math.round(percentUsed * 100)}%
+              </Text>
             </View>
-            <Text style={styles.forecastAmount}>{formatINR(Math.round(forecast))}</Text>
-            <Text style={styles.forecastSub}>
-              Based on {formatINR(Math.round(dailyRate))}/day avg · {daysElapsed} days tracked
+            <View style={styles.dailyMeterRow}>
+              <Text style={[styles.dailyMeterAmount, { color: dailyMeterColor }]}>
+                {formatINR(todaySpent)}
+              </Text>
+              <Text style={styles.dailyMeterLimit}>/ {formatINR(dailyLimit)}</Text>
+            </View>
+            <View style={styles.dailyMeterTrack}>
+              <View
+                style={[
+                  styles.dailyMeterFill,
+                  {
+                    width: `${Math.min(Math.round(percentUsed * 100), 100)}%` as any,
+                    backgroundColor: dailyMeterColor,
+                  },
+                ]}
+              />
+            </View>
+            <Text style={styles.dailyMeterHint}>
+              {isOverBudget
+                ? `Over by ${formatINR(todaySpent - dailyLimit)}`
+                : `${formatINR(Math.max(dailyLimit - todaySpent, 0))} remaining today`}
             </Text>
-            {monthlyBudget > 0 && (
-              <View style={styles.forecastBudgetRow}>
-                <View style={[styles.forecastDot, { backgroundColor: forecastVsBudget > 0 ? C.error : C.success }]} />
-                <Text style={[styles.forecastBudgetText, { color: forecastVsBudget > 0 ? C.error : C.success }]}>
-                  {forecastVsBudget > 0
-                    ? `${Math.round(forecastVsBudget)}% over budget`
-                    : `${Math.abs(Math.round(forecastVsBudget))}% under budget`}
+          </View>
+        )}
+
+
+
+        {/* ── Peer Benchmark Card ─────────────────────────────────── */}
+        {benchmarkData?.has_data && (
+          <View style={[styles.bentoCard, styles.benchCard, { marginBottom: 14 }]}>
+            <View style={styles.benchHeader}>
+              <Text style={styles.benchLabel}>PEER BENCHMARK</Text>
+              <Text style={styles.benchPool}>{benchmarkData.total_users_in_pool} users</Text>
+            </View>
+            <View style={styles.benchRow}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.benchPercentile}>
+                  Top {100 - (benchmarkData.percentile ?? 0)}%
                 </Text>
+                <Text style={styles.benchHint}>of spenders in your peer group</Text>
+              </View>
+              <View style={styles.benchVsBox}>
+                <Text style={[
+                  styles.benchVsPct,
+                  { color: (benchmarkData.vs_community_pct ?? 0) > 0 ? C.error : C.success },
+                ]}>
+                  {(benchmarkData.vs_community_pct ?? 0) > 0 ? "+" : ""}
+                  {Math.round(benchmarkData.vs_community_pct ?? 0)}%
+                </Text>
+                <Text style={styles.benchVsLabel}>vs avg</Text>
+              </View>
+            </View>
+            {/* Top 3 category comparisons */}
+            {benchmarkData.category_benchmarks && (
+              <View style={styles.benchCats}>
+                {Object.entries(benchmarkData.category_benchmarks)
+                  .sort(([,a], [,b]) => Math.abs(b.diff_pct) - Math.abs(a.diff_pct))
+                  .slice(0, 3)
+                  .map(([cat, data]) => (
+                    <View key={cat} style={styles.benchCatRow}>
+                      <Text style={styles.benchCatName}>{getCategoryLabel(cat)}</Text>
+                      <Text style={[
+                        styles.benchCatDiff,
+                        { color: data.status === "above" ? C.error : data.status === "below" ? C.success : C.onSurfaceVar },
+                      ]}>
+                        {data.diff_pct > 0 ? "+" : ""}{Math.round(data.diff_pct)}% vs peers
+                      </Text>
+                    </View>
+                  ))}
               </View>
             )}
+          </View>
+        )}
+
+        {/* ── Mood Correlation Card ──────────────────────────────── */}
+        {moodData?.has_data && moodData.moods && (
+          <View style={[styles.bentoCard, styles.moodCard, { marginBottom: 14 }]}>
+            <Text style={styles.moodCardLabel}>MOOD × SPENDING</Text>
+            {moodData.highest_mood && (
+              <Text style={styles.moodInsight}>
+                You spend the most when feeling{" "}
+                <Text style={{ color: C.primary, fontWeight: "800" }}>
+                  {moodData.highest_mood}
+                </Text>
+              </Text>
+            )}
+            <View style={styles.moodBarRow}>
+              {Object.entries(moodData.moods)
+                .sort(([,a], [,b]) => b.avg_spend - a.avg_spend)
+                .map(([mood, data]) => {
+                  const maxAvg = Math.max(...Object.values(moodData.moods!).map(m => m.avg_spend));
+                  const pct = maxAvg > 0 ? (data.avg_spend / maxAvg) * 100 : 0;
+                  const moodEmojis: Record<string, string> = {
+                    happy: "😊", neutral: "😐", stressed: "😟",
+                    frustrated: "😤", tired: "😴",
+                  };
+                  return (
+                    <View key={mood} style={styles.moodBarItem}>
+                      <Text style={styles.moodBarEmoji}>{moodEmojis[mood] ?? "😐"}</Text>
+                      <View style={styles.moodBarTrack}>
+                        <View
+                          style={[
+                            styles.moodBarFill,
+                            {
+                              width: `${Math.round(pct)}%` as any,
+                              backgroundColor: mood === moodData.highest_mood ? C.primary : C.onSurfaceVar + "44",
+                            },
+                          ]}
+                        />
+                      </View>
+                      <Text style={styles.moodBarAmt}>{formatINR(Math.round(data.avg_spend))}</Text>
+                    </View>
+                  );
+                })}
+            </View>
+            <Text style={styles.moodCardSub}>
+              Based on {moodData.total_mood_tagged} mood-tagged expense{moodData.total_mood_tagged === 1 ? "" : "s"}
+            </Text>
           </View>
         )}
 
@@ -303,7 +415,7 @@ export default function HomeScreen() {
             )}
             <TouchableOpacity
               style={styles.intelBtn}
-              onPress={() => router.push("/(tabs)/insights")}
+              onPress={() => router.navigate("/(tabs)/insights" as any)}
             >
               <Text style={styles.intelBtnText}>See details</Text>
               <ChevronRight color={C.primary} size={14} strokeWidth={2.5} />
@@ -354,7 +466,7 @@ export default function HomeScreen() {
               <Text style={styles.sectionTitle}>Recent Transactions</Text>
               <Text style={styles.sectionSub}>Your recent expense history</Text>
             </View>
-            <TouchableOpacity onPress={() => router.push("/(tabs)/expenses")}>
+            <TouchableOpacity onPress={() => router.navigate("/(tabs)/expenses" as any)}>
               <Text style={styles.viewAll}>View All</Text>
             </TouchableOpacity>
           </View>
@@ -699,60 +811,63 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
 
-  // ── Forecast Card ──────────────────────────────────────────────────────────
-  forecastCard: {
+  // ── Daily Spending Meter ───────────────────────────────────────────────────
+  dailyMeterCard: {
     backgroundColor: C.surface,
     borderWidth: 1,
     borderColor: C.outline + "22",
   },
-  forecastHeader: {
+  dailyMeterHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 8,
   },
-  forecastLabel: {
+  dailyMeterLabel: {
     color: C.onSurfaceVar,
     fontSize: 10,
     fontWeight: "700",
     letterSpacing: 1.5,
   },
-  forecastDays: {
-    color: C.outline,
-    fontSize: 11,
-    fontWeight: "600",
-    backgroundColor: C.surfaceHigh,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 8,
-    overflow: "hidden",
+  dailyMeterPct: {
+    fontSize: 14,
+    fontWeight: "800",
   },
-  forecastAmount: {
-    color: C.onSurface,
-    fontSize: 30,
-    fontWeight: "900",
-    letterSpacing: -1.5,
-  },
-  forecastSub: {
-    color: C.onSurfaceVar + "88",
-    fontSize: 12,
-    marginTop: 4,
-  },
-  forecastBudgetRow: {
+  dailyMeterRow: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "baseline",
     gap: 6,
-    marginTop: 10,
+    marginBottom: 10,
   },
-  forecastDot: {
-    width: 8,
+  dailyMeterAmount: {
+    fontSize: 26,
+    fontWeight: "900",
+    letterSpacing: -1,
+  },
+  dailyMeterLimit: {
+    color: C.onSurfaceVar + "88",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  dailyMeterTrack: {
+    width: "100%" as any,
     height: 8,
+    backgroundColor: C.surfaceHighest,
+    borderRadius: 4,
+    overflow: "hidden",
+    marginBottom: 8,
+  },
+  dailyMeterFill: {
+    height: "100%",
     borderRadius: 4,
   },
-  forecastBudgetText: {
+  dailyMeterHint: {
+    color: C.onSurfaceVar + "99",
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "500",
   },
+
+
 
   // ── Empty State ────────────────────────────────────────────────────────────
   emptyState: {
@@ -793,5 +908,139 @@ const styles = StyleSheet.create({
       android: { elevation: 12 },
       web: { boxShadow: "0 8px 24px rgba(204,201,137,0.4)" } as any,
     }),
+  },
+
+  // ── Benchmark Card ─────────────────────────────────────────────────────────
+  benchCard: {
+    backgroundColor: C.surface,
+    borderWidth: 1,
+    borderColor: C.outline + "22",
+  },
+  benchHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  benchLabel: {
+    color: C.onSurfaceVar,
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 1.5,
+  },
+  benchPool: {
+    color: C.onSurfaceVar + "66",
+    fontSize: 10,
+    fontWeight: "600",
+  },
+  benchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  benchPercentile: {
+    color: C.primary,
+    fontSize: 24,
+    fontWeight: "900",
+    letterSpacing: -0.5,
+  },
+  benchHint: {
+    color: C.onSurfaceVar + "88",
+    fontSize: 11,
+    marginTop: 2,
+  },
+  benchVsBox: {
+    alignItems: "center",
+    backgroundColor: C.surfaceHighest + "55",
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  benchVsPct: {
+    fontSize: 18,
+    fontWeight: "800",
+  },
+  benchVsLabel: {
+    color: C.onSurfaceVar + "77",
+    fontSize: 9,
+    fontWeight: "600",
+    marginTop: 1,
+  },
+  benchCats: {
+    borderTopWidth: 1,
+    borderTopColor: C.outline + "15",
+    paddingTop: 10,
+    gap: 6,
+  },
+  benchCatRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  benchCatName: {
+    color: C.onSurfaceVar,
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  benchCatDiff: {
+    fontSize: 11,
+    fontWeight: "700",
+  },
+
+  // ── Mood Correlation Card ──────────────────────────────────────────────────
+  moodCard: {
+    backgroundColor: C.surface,
+    borderWidth: 1,
+    borderColor: C.outline + "22",
+  },
+  moodCardLabel: {
+    color: C.onSurfaceVar,
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 1.5,
+    marginBottom: 8,
+  },
+  moodInsight: {
+    color: C.onSurface,
+    fontSize: 14,
+    fontWeight: "500",
+    marginBottom: 14,
+    lineHeight: 20,
+  },
+  moodBarRow: {
+    gap: 8,
+  },
+  moodBarItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  moodBarEmoji: {
+    fontSize: 16,
+    width: 24,
+    textAlign: "center",
+  },
+  moodBarTrack: {
+    flex: 1,
+    height: 8,
+    backgroundColor: C.surfaceHighest,
+    borderRadius: 4,
+    overflow: "hidden",
+  },
+  moodBarFill: {
+    height: "100%",
+    borderRadius: 4,
+  },
+  moodBarAmt: {
+    color: C.onSurfaceVar,
+    fontSize: 10,
+    fontWeight: "600",
+    width: 50,
+    textAlign: "right",
+  },
+  moodCardSub: {
+    color: C.onSurfaceVar + "66",
+    fontSize: 10,
+    marginTop: 10,
   },
 });

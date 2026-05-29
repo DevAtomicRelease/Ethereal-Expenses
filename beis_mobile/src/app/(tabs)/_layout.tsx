@@ -89,8 +89,11 @@ function FloatingTabBar({ state, navigation, descriptors, insets: _insets }: Bot
               target: state.routes[routeIndex].key,
               canPreventDefault: true,
             });
-            if (!isFocused && !event.defaultPrevented) {
-              navigation.navigate(name);
+            if (!event.defaultPrevented) {
+              // Always navigate to the tab's index/root screen.
+              // This prevents stale sub-screens (e.g. user-profile) from
+              // persisting when switching between tabs.
+              navigation.navigate(name as never, { screen: "index" } as never);
             }
           };
 

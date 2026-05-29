@@ -24,11 +24,11 @@ export function useDeleteExpense() {
       qc.setQueriesData<ExpenseListResponse>(
         { queryKey: ["expenses"] },
         (old) => {
-          if (!old) return old;
+          if (!old || !Array.isArray(old.transactions)) return old;
           return {
             ...old,
             transactions: old.transactions.filter((t) => t.id !== deletedId),
-            total: Math.max(0, old.total - 1),
+            total: Math.max(0, (old.total ?? 0) - 1),
           };
         }
       );
@@ -39,7 +39,9 @@ export function useDeleteExpense() {
     onError: (_err, _vars, context) => {
       if (context?.previousExpenses) {
         for (const [queryKey, data] of context.previousExpenses) {
-          qc.setQueryData(queryKey, data);
+          if (queryKey && data) {
+            qc.setQueryData(queryKey, data);
+          }
         }
       }
     },

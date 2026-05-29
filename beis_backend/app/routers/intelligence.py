@@ -2,10 +2,11 @@
 
 from fastapi import APIRouter, Depends, Query
 
-from app.data.models import User, AnomalyLog
+from app.data.models import User, AnomalyLog, Transaction
 from app.dependencies import get_current_user
 from app.services.intelligence_service import run_pipeline, get_individual_engine
 from app.services.insight_service import get_insights
+from app.services.benchmark_service import get_benchmarks
 
 router = APIRouter(tags=["intelligence"])
 
@@ -143,3 +144,49 @@ async def anomaly_history(
         ],
         "total": len(logs),
     }
+
+
+@router.get("/insights/mood-correlation")
+async def mood_correlation(user: User = Depends(get_current_user)):
+    """Compute average spend per mood for behavioral insights."""
+    uid = str(user.id)
+    txns = await Transaction.find(
+        Transaction.user_id == uid,
+        Transaction.is_deleted == False,
+        Transaction.mood != None,
+    ).to_list()
+
+    if not txns:
+        return {"has_data": False, "moods": {}, "highest_mood": None, "message": "No mood-tagged expenses yet."}
+
+    mood_data: dict = {}
+    for t in txns:
+        m = t.mood
+        if m not in mood_data:
+            mood_data[m] = {"total": 0.0, "count": 0}
+        mood_data[m]["total"] += t.amount
+        mood_data[m]["count"] += 1
+
+    result = {}
+    for m, d in mood_data.items():
+        result[m] = {
+            "avg_spend": round(d["total"] / d["count"], 2),
+            "total_spend": round(d["total"], 2),
+            "count": d["count"],
+        }
+
+    highest_mood = max(result, key=lambda m: result[m]["avg_spend"]) if result else None
+
+    return {
+        "has_data": True,
+        "moods": result,
+        "highest_mood": highest_mood,
+        "total_mood_tagged": len(txns),
+    }
+
+
+@router.get("/insights/benchmarks")
+async def benchmarks(user: User = Depends(get_current_user)):
+    """Anonymized peer spending benchmarks."""
+    return await get_benchmarks(str(user.id))
+

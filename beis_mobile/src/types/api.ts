@@ -37,6 +37,7 @@ export interface ExpenseResponse {
   timestamp: string;
   source?: string;
   anomaly_flag?: boolean;
+  mood?: string;
 }
 
 /** POST /expense request body. */
@@ -45,6 +46,7 @@ export interface ExpenseCreate {
   category: string;
   description?: string;
   timestamp: string;
+  mood?: string;
 }
 
 /** PUT /expenses/{id} request body. */
@@ -53,6 +55,7 @@ export interface ExpenseUpdate {
   category?: string;
   description?: string;
   timestamp?: string;
+  mood?: string;
 }
 
 /**

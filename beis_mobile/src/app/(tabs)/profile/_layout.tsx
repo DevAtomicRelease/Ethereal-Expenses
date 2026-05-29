@@ -10,6 +10,7 @@ export default function ProfileLayout() {
       <Stack.Screen name="goals" />
       <Stack.Screen name="thresholds" />
       <Stack.Screen name="data-export" />
+      <Stack.Screen name="impulse-log" />
     </Stack>
   );
 }

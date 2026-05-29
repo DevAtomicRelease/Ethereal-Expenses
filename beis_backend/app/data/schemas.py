@@ -51,6 +51,7 @@ class ExpenseCreate(BaseModel):
     category: CategoryEnum
     description: Optional[str] = Field(None, max_length=500)
     timestamp: str
+    mood: Optional[str] = Field(None, max_length=20)
 
 
 class ExpenseUpdate(BaseModel):
@@ -58,6 +59,7 @@ class ExpenseUpdate(BaseModel):
     category: Optional[CategoryEnum] = None
     description: Optional[str] = Field(None, max_length=500)
     timestamp: Optional[str] = None
+    mood: Optional[str] = Field(None, max_length=20)
 
 
 class ExpenseBatchCreate(BaseModel):

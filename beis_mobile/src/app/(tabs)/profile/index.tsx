@@ -232,6 +232,11 @@ export default function SettingsScreen() {
             onPress={() => router.push("/(tabs)/profile/batch-import" as any)}
           />
           <SettingsRow
+            iconXml={ICONS.history}
+            label="Impulse Watchlist"
+            onPress={() => router.push("/(tabs)/profile/impulse-log" as any)}
+          />
+          <SettingsRow
             iconXml={ICONS.privacy}
             label="Data & Privacy"
             onPress={() => router.push("/(tabs)/profile/data-export")}

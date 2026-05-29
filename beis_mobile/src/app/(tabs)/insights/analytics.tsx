@@ -34,6 +34,8 @@ import { useInsights } from "@/api/queries/useInsights";
 import { useIntelligence } from "@/api/queries/useIntelligence";
 import { useRisk } from "@/api/queries/useRisk";
 import { useExpenses } from "@/api/queries/useExpenses";
+import { useThresholds } from "@/api/queries/useThresholds";
+import { formatINR } from "@/utils/currency";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 const C = {
@@ -130,6 +132,7 @@ export default function AnalyticsDetailScreen() {
   const { data: intel } = useIntelligence();
   const { data: risk } = useRisk();
   const { data: expenseData } = useExpenses({ page: 1, limit: 500 });
+  const { data: thresholds } = useThresholds();
 
   // Parse range to days
   const rangeDays = range === "7D" ? 7 : range === "30D" ? 30 : 90;
@@ -188,6 +191,25 @@ export default function AnalyticsDetailScreen() {
   // Risk
   const riskScore = risk?.risk_score ?? 0;
   const riskLevel = risk?.risk_level ?? "safe";
+
+  // End-of-month forecast
+  const { monthlySpent, daysElapsed, daysInMonth } = useMemo(() => {
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    const all = (expenseData as any)?.transactions ?? (expenseData as any)?.expenses ?? [];
+    const spent = all
+      .filter((e: any) => new Date(e.timestamp) >= monthStart)
+      .reduce((sum: number, e: any) => sum + (e.amount || 0), 0);
+    const elapsed = now.getDate();
+    const totalDays = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    return { monthlySpent: spent, daysElapsed: elapsed, daysInMonth: totalDays };
+  }, [expenseData]);
+
+  const monthlyBudget = thresholds?.monthly ?? 0;
+  const dailyRate = daysElapsed > 0 ? monthlySpent / daysElapsed : 0;
+  const forecast = dailyRate * daysInMonth;
+  const remainingDays = daysInMonth - daysElapsed;
+  const forecastVsBudget = monthlyBudget > 0 ? ((forecast - monthlyBudget) / monthlyBudget) * 100 : 0;
 
   return (
     <SafeAreaView style={s.safe} edges={["top"]}>
@@ -276,6 +298,30 @@ export default function AnalyticsDetailScreen() {
             <Text style={s.trendXLabel}>{dailyTrend[dailyTrend.length - 1]?.date.slice(5) ?? ""}</Text>
           </View>
         </View>
+
+        {/* ── End-of-Month Forecast Card ───────────────────── */}
+        {monthlySpent > 0 && (
+          <View style={s.forecastCard}>
+            <View style={s.forecastHeader}>
+              <Text style={s.forecastLabel}>END-OF-MONTH FORECAST</Text>
+              <Text style={s.forecastDays}>{remainingDays}d left</Text>
+            </View>
+            <Text style={s.forecastAmount}>{formatINR(Math.round(forecast))}</Text>
+            <Text style={s.forecastSub}>
+              Based on {formatINR(Math.round(dailyRate))}/day avg · {daysElapsed} days tracked
+            </Text>
+            {monthlyBudget > 0 && (
+              <View style={s.forecastBudgetRow}>
+                <View style={[s.forecastDot, { backgroundColor: forecastVsBudget > 0 ? C.error : C.safe }]} />
+                <Text style={[s.forecastBudgetText, { color: forecastVsBudget > 0 ? C.error : C.safe }]}>
+                  {forecastVsBudget > 0
+                    ? `${Math.round(forecastVsBudget)}% over budget`
+                    : `${Math.abs(Math.round(forecastVsBudget))}% under budget`}
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
 
         {/* ── Lifestyle Radar Card ────────────────────────────── */}
         <View style={s.radarCard}>
@@ -894,5 +940,64 @@ const s = StyleSheet.create({
     color: C.onSurfaceVar + "66",
     fontSize: 9,
     fontWeight: "600",
+  },
+
+  // ── Forecast Card ──────────────────────────────────────────────────────────
+  forecastCard: {
+    marginHorizontal: 20,
+    marginBottom: 20,
+    borderRadius: 28,
+    padding: 24,
+    backgroundColor: C.surface,
+    borderWidth: 1,
+    borderColor: C.outlineVar + "0D",
+  },
+  forecastHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  forecastLabel: {
+    color: C.onSurfaceVar,
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 1.5,
+  },
+  forecastDays: {
+    color: C.outline,
+    fontSize: 11,
+    fontWeight: "600",
+    backgroundColor: C.surfaceHigh,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    overflow: "hidden",
+  },
+  forecastAmount: {
+    color: C.onSurface,
+    fontSize: 30,
+    fontWeight: "900",
+    letterSpacing: -1.5,
+  },
+  forecastSub: {
+    color: C.onSurfaceVar + "88",
+    fontSize: 12,
+    marginTop: 4,
+  },
+  forecastBudgetRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginTop: 10,
+  },
+  forecastDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  forecastBudgetText: {
+    fontSize: 12,
+    fontWeight: "700",
   },
 });

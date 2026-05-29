@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { LogBox, Platform, AppState } from "react-native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -12,6 +12,13 @@ import NetInfo from "@react-native-community/netinfo";
 import { store, persistor } from "@/store/store";
 import { wsClient } from "@/api/websocket";
 import { initNetworkMonitor, setOnReconnect } from "@/services/networkMonitor";
+import { intelligenceClient } from "@/api/intelligenceClient";
+import {
+  registerForPushNotifications,
+  notifyHighRisk,
+  notifyAnomalyDetected,
+  notifyOverBudgetForecast,
+} from "@/services/notifications";
 
 LogBox.ignoreLogs(['props.pointerEvents is deprecated']);
 
@@ -83,6 +90,7 @@ const asyncStoragePersister = createAsyncStoragePersister({
 function AppShell() {
     const isAuthenticated = useSelector((s: any) => s.auth?.isAuthenticated);
     const qc = useQueryClient();
+    const notificationsRegistered = useRef(false);
 
     // Initialize network monitor + register reconnect handler
     useEffect(() => {
@@ -92,6 +100,14 @@ function AppShell() {
             qc.invalidateQueries();
         });
     }, [qc]);
+
+    // Register for push notifications once on mount
+    useEffect(() => {
+        if (!notificationsRegistered.current) {
+            notificationsRegistered.current = true;
+            registerForPushNotifications().catch(() => {});
+        }
+    }, []);
 
     // Connect/disconnect WebSocket based on auth state
     useEffect(() => {
@@ -106,6 +122,41 @@ function AppShell() {
                 qc.invalidateQueries({ queryKey: ["momentum"] });
                 qc.invalidateQueries({ queryKey: ["identity"] });
                 qc.invalidateQueries({ queryKey: ["anomalies"] });
+
+                // ── Behavioral notifications ─────────────────────────
+                // Fetch fresh risk + anomaly data and fire local alerts.
+                // Wrapped in try/catch so a failed fetch never crashes the WS handler.
+                (async () => {
+                    try {
+                        const [riskData, anomalyData, momentumData, thresholdData] = await Promise.all([
+                            intelligenceClient.get("risk").json<any>(),
+                            intelligenceClient.get("anomalies").json<any>(),
+                            intelligenceClient.get("momentum").json<any>(),
+                            intelligenceClient.get("thresholds").json<any>(),
+                        ]);
+
+                        // High risk alert (score ≥ 70)
+                        if (riskData?.risk_score >= 70) {
+                            notifyHighRisk(riskData.risk_score, riskData.risk_level);
+                        }
+
+                        // Anomaly alert
+                        if (anomalyData?.anomalies_detected && anomalyData.anomaly_count > 0) {
+                            notifyAnomalyDetected(anomalyData.anomaly_count);
+                        }
+
+                        // Over-budget forecast alert
+                        if (
+                            momentumData?.projection_30d > 0 &&
+                            thresholdData?.monthly > 0 &&
+                            momentumData.projection_30d > thresholdData.monthly * 1.1
+                        ) {
+                            notifyOverBudgetForecast(momentumData.projection_30d, thresholdData.monthly);
+                        }
+                    } catch {
+                        // Silently ignore — notifications are best-effort
+                    }
+                })();
             });
 
             // Refresh expense list when new expenses arrive

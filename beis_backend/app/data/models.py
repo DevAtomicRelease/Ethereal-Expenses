@@ -45,6 +45,7 @@ class Transaction(Document):
     category: str
     description: Optional[str] = None
     source: str = "manual"
+    mood: Optional[str] = None  # happy, neutral, stressed, frustrated, tired
     anomaly_flag: bool = False
     is_deleted: bool = False
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

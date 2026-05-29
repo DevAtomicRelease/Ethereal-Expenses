@@ -38,7 +38,8 @@ export function useAddExpense() {
       qc.setQueriesData<ExpenseListResponse>(
         { queryKey: ["expenses"] },
         (old) => {
-          if (!old) return old;
+          // Guard: if cache is empty/undefined or transactions field missing, skip
+          if (!old || !Array.isArray(old.transactions)) return old;
           const optimistic: ExpenseResponse = {
             id: `optimistic_${Date.now()}`,
             amount: typeof newExpense.amount === "number" ? newExpense.amount : parseFloat(String(newExpense.amount)),
@@ -51,7 +52,7 @@ export function useAddExpense() {
           return {
             ...old,
             transactions: [optimistic, ...old.transactions],
-            total: old.total + 1,
+            total: (old.total ?? 0) + 1,
           };
         }
       );
@@ -63,7 +64,9 @@ export function useAddExpense() {
     onError: (_err, _vars, context) => {
       if (context?.previousExpenses) {
         for (const [queryKey, data] of context.previousExpenses) {
-          qc.setQueryData(queryKey, data);
+          if (queryKey && data) {
+            qc.setQueryData(queryKey, data);
+          }
         }
       }
     },

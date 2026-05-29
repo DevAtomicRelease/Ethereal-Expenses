@@ -56,6 +56,7 @@ async def create_expense(
     txn = Transaction(
         user_id=uid, timestamp=ts, amount=float(req.amount),
         category=req.category.value, description=req.description, source="manual",
+        mood=req.mood,
     )
     await txn.insert()
     await invalidate_user_cache(uid)
@@ -70,7 +71,8 @@ async def create_expense(
     })
 
     return {"id": str(txn.id), "amount": txn.amount, "category": txn.category,
-            "timestamp": txn.timestamp.isoformat(), "anomaly_flag": txn.anomaly_flag}
+            "timestamp": txn.timestamp.isoformat(), "anomaly_flag": txn.anomaly_flag,
+            "mood": txn.mood}
 
 
 @router.get("/expenses")
@@ -91,7 +93,7 @@ async def list_expenses(
         "transactions": [
             {"id": str(t.id), "amount": t.amount, "category": t.category,
              "description": t.description, "timestamp": t.timestamp.isoformat(),
-             "source": t.source, "anomaly_flag": t.anomaly_flag}
+             "source": t.source, "anomaly_flag": t.anomaly_flag, "mood": t.mood}
             for t in txns
         ],
         "total": total, "page": page, "limit": limit,
@@ -103,7 +105,7 @@ async def get_expense(txn_id: str, user: User = Depends(get_current_user)):
     txn = await _get_txn_or_404(txn_id, user)
     return {"id": str(txn.id), "amount": txn.amount, "category": txn.category,
             "description": txn.description, "timestamp": txn.timestamp.isoformat(),
-            "source": txn.source, "anomaly_flag": txn.anomaly_flag}
+            "source": txn.source, "anomaly_flag": txn.anomaly_flag, "mood": txn.mood}
 
 
 @router.put("/expenses/{txn_id}")
@@ -138,6 +140,8 @@ async def update_expense(
             triggers_rebuild = True
         if req.description is not None:
             txn.description = req.description
+        if req.mood is not None:
+            txn.mood = req.mood
 
         await txn.save()
         uid = str(user.id)

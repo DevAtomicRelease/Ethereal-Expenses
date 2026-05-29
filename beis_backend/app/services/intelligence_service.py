@@ -51,7 +51,7 @@ async def run_pipeline(user_id: str) -> Dict[str, Any]:
 
     # Step 3: Window selection (90-day)
     window_start = datetime.now(timezone.utc) - timedelta(days=settings.ANALYSIS_WINDOW_DAYS)
-    windowed = [t for t in all_txns if t.timestamp >= window_start]
+    windowed = [t for t in all_txns if (t.timestamp.replace(tzinfo=timezone.utc) if t.timestamp.tzinfo is None else t.timestamp) >= window_start]
     if len(windowed) < settings.MIN_TRANSACTIONS:
         windowed = all_txns[:max(settings.MIN_TRANSACTIONS, len(all_txns))]
 
